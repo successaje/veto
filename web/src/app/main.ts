@@ -33,6 +33,16 @@ onNavigate((path) =>
   }),
 );
 
+// Connection status. Firestore queues writes while offline, so say what that means for the user.
+const offlineBanner = h(
+  'div',
+  { class: 'offline-banner', role: 'status', hidden: navigator.onLine },
+  icon('alert'),
+  'You’re offline. Your note is safe on this device; anything you send will go when you reconnect.',
+);
+addEventListener('offline', () => (offlineBanner.hidden = false));
+addEventListener('online', () => (offlineBanner.hidden = true));
+
 const main = h('main', { class: 'app-main', id: 'main' });
 document
   .querySelector('#app')!
@@ -47,6 +57,7 @@ document
         nav,
         deviceIndicator,
       ),
+      offlineBanner,
     ),
     main,
   );

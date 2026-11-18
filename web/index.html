@@ -3,22 +3,313 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Veto: pick a place that works for everyone</title>
     <meta
       name="description"
-      content="Pick a place that works for everyone, without anyone having to explain why."
+      content="Veto helps a group pick a place without anyone explaining why. Each person's phone rules options out privately; the group only learns what works for all."
     />
-    <title>Veto</title>
+    <meta name="theme-color" content="#f7f4ee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#141311" media="(prefers-color-scheme: dark)" />
     <script>
       // Links shared before the move to real URLs used hashes (/#/r/<id>). Send them to the app.
-      const legacy = location.hash.match(/^#\/(r\/[A-Za-z0-9]+|note|ledger)?/);
-      if (legacy) {
-        const path =
-          { note: '/app/note', ledger: '/app/privacy' }[legacy[1]] ?? (legacy[1] ? '/' + legacy[1] : '/app');
-        location.replace(path);
-      } else location.replace('/app');
+      const legacy = location.hash.match(/^#\/(r\/[A-Za-z0-9]+|note|ledger)/);
+      if (legacy)
+        location.replace({ note: '/app/note', ledger: '/app/privacy' }[legacy[1]] ?? '/' + legacy[1]);
     </script>
   </head>
   <body>
-    <p><a href="/app">Open Veto</a></p>
+    <header class="site-header">
+      <div class="site-header-inner">
+        <a class="wordmark" href="/">
+          <svg
+            class="icon wordmark-mark"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M5 4.5 12 19.5 19 4.5" />
+            <path d="M3.5 13.5 20.5 9" />
+          </svg>
+          Veto
+        </a>
+        <nav class="site-nav" aria-label="Site">
+          <a href="#how">How it works</a>
+          <a href="#privacy">Privacy</a>
+          <a class="btn btn-primary btn-sm" href="/app">Open Veto</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">For group plans</p>
+          <h1>Pick a place that works for everyone. Nobody has to explain why.</h1>
+          <p class="lede">
+            Each person’s phone quietly rules out what won’t work for them. The group only sees the answer.
+          </p>
+          <div class="cluster">
+            <a class="btn btn-primary" href="/app">
+              <span>Plan something</span>
+              <svg
+                class="icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14M13 6l6 6-6 6" />
+              </svg>
+            </a>
+            <a class="btn btn-ghost" href="#how">See how it works</a>
+          </div>
+        </div>
+
+        <figure class="demo" aria-label="Example: four people decide on dinner">
+          <div class="demo-notes">
+            <p class="demo-label">What each phone knows</p>
+            <ul>
+              <li><span class="demo-who">Priya</span> “Pregnant. No raw fish or soft cheese.”</li>
+              <li><span class="demo-who">Dev</span> “Sober. Not a bar.”</li>
+              <li><span class="demo-who">Sam</span> “Broke until Friday. Under $20.”</li>
+              <li><span class="demo-who">Lena</span> “Bad knee. No stairs.”</li>
+            </ul>
+            <p class="demo-foot">
+              <svg
+                class="icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="5" y="11" width="14" height="10" rx="2" />
+                <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+              </svg>
+              Never leaves each phone
+            </p>
+          </div>
+          <div class="demo-options">
+            <p class="demo-label">What the group sees</p>
+            <ol>
+              <li data-out>Kumo Sushi Bar</li>
+              <li data-out>The Tap Room</li>
+              <li data-out>Oyster &amp; Ash</li>
+              <li data-out>Trattoria Nonna</li>
+              <li data-out>Rooftop 9</li>
+              <li data-win>Green Bowl</li>
+            </ol>
+            <p class="demo-result">
+              <strong>Works for everyone: Green Bowl.</strong>
+              5 options didn’t work for someone. Nobody had to explain.
+            </p>
+          </div>
+        </figure>
+      </section>
+
+      <section class="band" id="problem">
+        <div class="band-inner prose">
+          <h2>The real reasons are the ones nobody says out loud</h2>
+          <p>
+            Someone is pregnant and hasn’t told anyone. Someone is sober. Someone can’t afford it this week,
+            or can’t manage the stairs, or would rather not run into their ex behind the bar.
+          </p>
+          <p>
+            So the group chat picks somewhere, and one person quietly has a bad night, or invents an excuse
+            not to come. A poll doesn’t help: it still asks people to say what they don’t want to say.
+          </p>
+        </div>
+      </section>
+
+      <section class="section" id="how">
+        <div class="section-inner">
+          <header class="section-head">
+            <p class="eyebrow">How it works</p>
+            <h2>Three parties, and each one sees only its part</h2>
+          </header>
+          <ol class="flow">
+            <li>
+              <p class="flow-who">
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M7 18.5h10a4 4 0 0 0 .6-7.96A6 6 0 0 0 6.2 9.6 4.5 4.5 0 0 0 7 18.5Z" />
+                </svg>
+                The cloud
+              </p>
+              <h3>Finds real places from the public plan</h3>
+              <p>
+                The host types “dinner Saturday near Riverside, relaxed”. Gemini, grounded in Google Maps,
+                proposes up to ten places. That sentence is all the cloud ever sees.
+              </p>
+            </li>
+            <li>
+              <p class="flow-who">
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="6" y="2.5" width="12" height="19" rx="2.5" />
+                  <path d="M11 18.5h2" />
+                </svg>
+                Your phone
+              </p>
+              <h3>Checks each place against your private note</h3>
+              <p>
+                An AI model running on your device reads your note and turns it into limits. Plain code rules
+                out anything that breaks one; the model only ranks the rest. You see your own result before
+                anything is sent.
+              </p>
+            </li>
+            <li>
+              <p class="flow-who">
+                <svg
+                  class="icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.75"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="9" cy="8" r="3.5" />
+                  <path d="M2.5 20a6.5 6.5 0 0 1 13 0" />
+                  <path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.6a6.5 6.5 0 0 1 3.5 5.4" />
+                </svg>
+                The group
+              </p>
+              <h3>Learns what works for everyone, and nothing else</h3>
+              <p>
+                Your phone sends only +1s to anonymous counters. Nobody, including the host, can see the
+                counts until the last person has voted. Then everyone sees the winner.
+              </p>
+            </li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="section section-alt" id="privacy">
+        <div class="section-inner proof">
+          <div class="prose">
+            <p class="eyebrow">Proof, not promises</p>
+            <h2>This is everything the database knows about your vote</h2>
+            <p>
+              A vote is one batch of increments. Security rules allow exactly one per person, cap each
+              increment, and keep the totals hidden until everyone is done. There is no field for a reason,
+              and no record of who chose what.
+            </p>
+            <p>
+              The app also keeps a list of every AI call and database write it makes, so you can check: your
+              note never appears in it.
+            </p>
+          </div>
+          <pre
+            class="proof-doc"
+            aria-label="Example of the room's tally document"
+          ><code><span class="c">// rooms/{room}/tally/main</span>
+{
+  <span class="k">"v0"</span>: 1,  <span class="k">"s0"</span>: 5,   <span class="c">// vetoed by someone</span>
+  <span class="k">"v1"</span>: 0,  <span class="k">"s1"</span>: 7,
+  <span class="k">"v2"</span>: 0,  <span class="k">"s2"</span>: 11,  <span class="c">// the winner</span>
+  …
+  <span class="k">"submitted"</span>: 4
+}</code></pre>
+        </div>
+      </section>
+
+      <section class="section" id="where">
+        <div class="section-inner">
+          <header class="section-head">
+            <p class="eyebrow">Hybrid AI, on purpose</p>
+            <h2>Where each part runs</h2>
+            <p class="lede">
+              A cloud-only app can’t keep the promise. A phone-only app can’t find real places. Veto routes
+              each step with Firebase AI Logic.
+            </p>
+          </header>
+          <div class="table-wrap">
+            <table class="where">
+              <thead>
+                <tr>
+                  <th scope="col">Step</th>
+                  <th scope="col">Runs</th>
+                  <th scope="col">Why</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Reading the plan</td>
+                  <td><span class="tag">Device if ready, else cloud</span></td>
+                  <td>Public text; fastest wherever it runs</td>
+                </tr>
+                <tr>
+                  <td>Finding places</td>
+                  <td><span class="tag tag-cloud">Cloud + Google Maps</span></td>
+                  <td>Needs current, real places</td>
+                </tr>
+                <tr>
+                  <td>Understanding your note</td>
+                  <td><span class="tag tag-device">This device only</span></td>
+                  <td>The promise</td>
+                </tr>
+                <tr>
+                  <td>Checking each place for you</td>
+                  <td><span class="tag tag-device">This device only</span></td>
+                  <td>Derived from your note, so private too</td>
+                </tr>
+                <tr>
+                  <td>“Why this works”</td>
+                  <td><span class="tag">Device if ready, else cloud</span></td>
+                  <td>Uses only the winner’s public details</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="small muted">
+            No on-device AI in your browser? You vote by hand. Veto never falls back to the cloud for anything
+            private.
+          </p>
+        </div>
+      </section>
+
+      <section class="cta">
+        <div class="section-inner cta-inner">
+          <h2>Next time the group can’t decide, send a Veto link.</h2>
+          <a class="btn btn-primary" href="/app">Plan something</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="section-inner spread small muted">
+        <p>Veto is open source under the Apache 2.0 license.</p>
+        <a href="https://github.com/successaje/veto">Source on GitHub</a>
+      </div>
+    </footer>
+
+    <script type="module" src="/src/landing/main.ts"></script>
   </body>
 </html>

@@ -40,6 +40,7 @@ export default defineConfig(({ mode }) => {
           main: resolve(__dirname, 'index.html'),
           app: resolve(__dirname, 'app.html'),
           eval: resolve(__dirname, 'eval.html'),
+          notFound: resolve(__dirname, '404.html'),
         },
       },
     },

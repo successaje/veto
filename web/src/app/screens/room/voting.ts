@@ -8,6 +8,7 @@ import { busy, button, notice, sourceTag, steps } from '../../../ui/components';
 import { h } from '../../../ui/dom';
 import { icon } from '../../../ui/icons';
 import type { RoomCtx } from './context';
+import { reportError } from '../../report';
 
 /** While voting: decide with the private profile on this device, or by hand. */
 export function voting(ctx: RoomCtx): HTMLElement {
@@ -125,7 +126,8 @@ function decideWithProfile(ctx: RoomCtx, profile: PrivateProfile, items: Candida
               void busy(sendBtn, 'Sending…', async () => {
                 try {
                   await send(ctx, sending, d.choices, d.details);
-                } catch {
+                } catch (e) {
+                  reportError(e);
                   sending.replaceChildren(
                     notice(
                       'error',
@@ -151,7 +153,8 @@ function decideWithProfile(ctx: RoomCtx, profile: PrivateProfile, items: Candida
             sending,
           );
           decide.remove();
-        } catch {
+        } catch (e) {
+          reportError(e);
           status.replaceChildren(
             notice('error', 'Your device couldn’t finish.', 'Nothing was sent. Try again, or vote by hand.'),
           );
@@ -181,7 +184,8 @@ function decideByHand(ctx: RoomCtx, items: Candidate[]): HTMLElement {
       void busy(sendBtn, 'Sending…', async () => {
         try {
           await send(ctx, sending, [...picks.values()]);
-        } catch {
+        } catch (e) {
+          reportError(e);
           sending.replaceChildren(
             notice(
               'error',

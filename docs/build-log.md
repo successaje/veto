@@ -17,10 +17,12 @@ Milestones in the order they landed. Dates are 2026. The plan this follows runs 
 | Nov 18 | Landing page at `/`, static and Firebase-free                                                |
 | Nov 18 | Your rooms on the app home, one-tap voting by hand, staged sending, offline state            |
 | Nov 18 | Private profile editor with a plain-language read-back, replacing raw JSON                   |
+| Nov 18 | Fixed before first deploy: App Check debug token was inlined into production bundles         |
+| Nov 18 | Live on Hosting with App Check (reCAPTCHA Enterprise); full room verified on the live site   |
 
 ## Open items
 
 - On-device call in a real Chrome profile (hardware check on the dev Mac is pending), then eval numbers.
 - Maps-grounded candidate search on the free tier (currently the demo list).
-- Deploy to Hosting with a reCAPTCHA Enterprise key.
+- Enforce App Check for Firestore and AI Logic once real-browser traffic shows valid tokens.
 - Android and iOS clients (plan days 5 to 7).

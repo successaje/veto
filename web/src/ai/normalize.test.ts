@@ -32,18 +32,40 @@ describe('sanitizeProfile', () => {
 
 describe('sanitizeCandidates', () => {
   it('re-indexes, caps the count and defaults unknowns', () => {
-    const items = Array.from({ length: 12 }, (_, k) => ({ name: `Place ${k}`, priceBand: 9, stepFree: 'ramp' }));
+    const items = Array.from({ length: 12 }, (_, k) => ({
+      name: `Place ${k}`,
+      priceBand: 9,
+      stepFree: 'ramp',
+    }));
     const out = sanitizeCandidates({ items: [{ name: '' }, ...items] }, 10);
     expect(out).toHaveLength(10);
-    expect(out[0]).toMatchObject({ i: 0, name: 'Place 0', priceBand: 4, stepFree: 'unknown', estPerPerson: null });
+    expect(out[0]).toMatchObject({
+      i: 0,
+      name: 'Place 0',
+      priceBand: 4,
+      stepFree: 'unknown',
+      estPerPerson: null,
+    });
     expect(out[9].i).toBe(9);
   });
 });
 
 describe('sanitizeScores', () => {
   it('keeps only requested indices and valid scores', () => {
-    const s = sanitizeScores({ scores: [{ i: 2, s: 3 }, { i: 5, s: 9 }, { i: 7, s: 0 }] }, [2, 5]);
-    expect([...s]).toEqual([[2, 3], [5, 1]]);
+    const s = sanitizeScores(
+      {
+        scores: [
+          { i: 2, s: 3 },
+          { i: 5, s: 9 },
+          { i: 7, s: 0 },
+        ],
+      },
+      [2, 5],
+    );
+    expect([...s]).toEqual([
+      [2, 3],
+      [5, 1],
+    ]);
   });
 });
 

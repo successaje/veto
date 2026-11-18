@@ -14,14 +14,7 @@
     "eggs",
     "spicy"
   ],
-  "venueTypes": [
-    "bar_centric",
-    "fine_dining",
-    "fast_casual",
-    "cafe",
-    "outdoor_only",
-    "late_night"
-  ],
+  "venueTypes": ["bar_centric", "fine_dining", "fast_casual", "cafe", "outdoor_only", "late_night"],
   "dietTags": [
     "vegetarian_friendly",
     "vegan_friendly",

@@ -19,13 +19,13 @@ Each feature has its own model instance and inference mode. All five calls live 
 [`web/src/ai/features.ts`](web/src/ai/features.ts); the model factories are in
 [`web/src/ai/models.ts`](web/src/ai/models.ts).
 
-| # | Feature | Who runs it | Mode | What it sees | Why this mode |
-|---|---|---|---|---|---|
-| 1 | Room helper: "dinner Saturday near Riverside, chill" → public room details | Host | `PREFER_ON_DEVICE` | Public text | Free and instant on device; still works on any browser via the cloud |
-| 2 | Find options | Host | `ONLY_IN_CLOUD` + Grounding with Google Maps | The room's public details only | Needs world knowledge and real places |
-| 3 | Understand my note → private profile | Each member | `ONLY_ON_DEVICE` | Their private note | Private: must never leave the device |
-| 4 | Private fit check | Each member | Plain code + `ONLY_ON_DEVICE` | Private profile + public options | Private: reasons never leave the device |
-| 5 | Explain the pick | Anyone | `PREFER_ON_DEVICE` | Public facts about the winner | Public; on device when possible |
+| #   | Feature                                                                    | Who runs it | Mode                                         | What it sees                     | Why this mode                                                        |
+| --- | -------------------------------------------------------------------------- | ----------- | -------------------------------------------- | -------------------------------- | -------------------------------------------------------------------- |
+| 1   | Room helper: "dinner Saturday near Riverside, chill" → public room details | Host        | `PREFER_ON_DEVICE`                           | Public text                      | Free and instant on device; still works on any browser via the cloud |
+| 2   | Find options                                                               | Host        | `ONLY_IN_CLOUD` + Grounding with Google Maps | The room's public details only   | Needs world knowledge and real places                                |
+| 3   | Understand my note → private profile                                       | Each member | `ONLY_ON_DEVICE`                             | Their private note               | Private: must never leave the device                                 |
+| 4   | Private fit check                                                          | Each member | Plain code + `ONLY_ON_DEVICE`                | Private profile + public options | Private: reasons never leave the device                              |
+| 5   | Explain the pick                                                           | Anyone      | `PREFER_ON_DEVICE`                           | Public facts about the winner    | Public; on device when possible                                      |
 
 Every answer shows where it ran (🔒 on this device / ☁️ cloud), read from `response.inferenceSource`.
 The **What left my device** screen logs every AI call and database write.
@@ -48,12 +48,12 @@ never fall back to the cloud.
 
 ## Privacy model
 
-| Data | Where it lives | Who can see it |
-|---|---|---|
-| Private note and profile | This browser's local storage | Only you |
-| Your reasons ("✗ centres on raw fish") | This browser | Only you |
-| Room details (title, area, time, vibe) | Firestore; sent to Gemini to find options | The room, Google |
-| Your vote | Anonymous increments to one shared tally | Nobody until everyone has voted, then only totals |
+| Data                                   | Where it lives                            | Who can see it                                    |
+| -------------------------------------- | ----------------------------------------- | ------------------------------------------------- |
+| Private note and profile               | This browser's local storage              | Only you                                          |
+| Your reasons ("✗ centres on raw fish") | This browser                              | Only you                                          |
+| Room details (title, area, time, vibe) | Firestore; sent to Gemini to find options | The room, Google                                  |
+| Your vote                              | Anonymous increments to one shared tally  | Nobody until everyone has voted, then only totals |
 
 The database enforces this ([`firebase/firestore.rules`](firebase/firestore.rules)):
 
@@ -66,11 +66,11 @@ See [docs/threat-model.md](docs/threat-model.md) for what this does and does not
 
 ## Evaluation
 
-| Platform | Model | Cases | Exact veto sets | Hard-constraint recall | Precision | p50 latency |
-|---|---|---|---|---|---|---|
-| Chrome (desktop) | Gemini Nano | 9 | _todo_ | _todo_ | _todo_ | _todo_ |
-| Android | Gemini Nano (STABLE) | 9 | _todo_ | _todo_ | _todo_ | _todo_ |
-| iOS | Apple Foundation Models | 9 | _todo_ | _todo_ | _todo_ | _todo_ |
+| Platform         | Model                   | Cases | Exact veto sets | Hard-constraint recall | Precision | p50 latency |
+| ---------------- | ----------------------- | ----- | --------------- | ---------------------- | --------- | ----------- |
+| Chrome (desktop) | Gemini Nano             | 9     | _todo_          | _todo_                 | _todo_    | _todo_      |
+| Android          | Gemini Nano (STABLE)    | 9     | _todo_          | _todo_                 | _todo_    | _todo_      |
+| iOS              | Apple Foundation Models | 9     | _todo_          | _todo_                 | _todo_    | _todo_      |
 
 Run the web eval at `/eval.html`. The dataset is in [`eval/`](eval/): synthetic people only.
 

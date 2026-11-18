@@ -5,15 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Veto eval</title>
     <style>
-      body { font: 15px/1.5 system-ui, sans-serif; max-width: 860px; margin: 24px auto; padding: 0 16px; }
-      pre { white-space: pre-wrap; background: #f3f1ec; padding: 12px; border-radius: 8px; }
-      @media (prefers-color-scheme: dark) { body { background: #161614; color: #ecebe6; } pre { background: #1f1f1c; } }
+      body {
+        font:
+          15px/1.5 system-ui,
+          sans-serif;
+        max-width: 860px;
+        margin: 24px auto;
+        padding: 0 16px;
+      }
+      pre {
+        white-space: pre-wrap;
+        background: #f3f1ec;
+        padding: 12px;
+        border-radius: 8px;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #161614;
+          color: #ecebe6;
+        }
+        pre {
+          background: #1f1f1c;
+        }
+      }
     </style>
   </head>
   <body>
     <h1>Veto on-device eval</h1>
-    <p>Runs every synthetic note in <code>eval/notes.sample.json</code> through the on-device model, applies the
-      code rules, and compares the vetoes with the labels. Nothing is sent to the cloud.</p>
+    <p>
+      Runs every synthetic note in <code>eval/notes.sample.json</code> through the on-device model, applies
+      the code rules, and compares the vetoes with the labels. Nothing is sent to the cloud.
+    </p>
     <button id="run">Run on this device</button>
     <pre id="out"></pre>
     <script type="module" src="/src/eval/run.ts"></script>

@@ -10,7 +10,13 @@
 // Hybrid gotcha: when `mode` is set, top-level model/systemInstruction/generationConfig are ignored.
 // Cloud settings go in inCloudParams; the on-device system prompt goes in initialPrompts.
 
-import { getGenerativeModel, InferenceMode, type GenerativeModel, type Tool, type ToolConfig } from 'firebase/ai';
+import {
+  getGenerativeModel,
+  InferenceMode,
+  type GenerativeModel,
+  type Tool,
+  type ToolConfig,
+} from 'firebase/ai';
 import { ai, cfg } from '../firebase';
 import { TEXT_ONLY } from './gate';
 
@@ -19,7 +25,9 @@ function systemPrompt(text: string) {
 }
 
 function jsonConfig(schema?: object) {
-  return schema ? { responseMimeType: 'application/json', responseJsonSchema: schema as Record<string, unknown> } : undefined;
+  return schema
+    ? { responseMimeType: 'application/json', responseJsonSchema: schema as Record<string, unknown> }
+    : undefined;
 }
 
 /** Private features. No inCloudParams on purpose; always call assertDeviceReady() first. */

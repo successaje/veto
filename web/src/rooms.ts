@@ -73,7 +73,11 @@ export async function joinRoom(id: string, name: string, mode: Member['mode']): 
   });
   b.update(roomRef(id), { memberCount: increment(1) });
   await b.commit();
-  record({ kind: 'firestore', feature: 'Join room', detail: `Saved your display name ("${name}") and that you joined.` });
+  record({
+    kind: 'firestore',
+    feature: 'Join room',
+    detail: `Saved your display name ("${name}") and that you joined.`,
+  });
 }
 
 export function watchRoom(id: string, cb: (room: Room | null) => void): Unsubscribe {
@@ -86,7 +90,11 @@ export function watchRoom(id: string, cb: (room: Room | null) => void): Unsubscr
   });
 }
 
-export function watchMembers(id: string, cb: (members: Member[]) => void, onError?: (e: Error) => void): Unsubscribe {
+export function watchMembers(
+  id: string,
+  cb: (members: Member[]) => void,
+  onError?: (e: Error) => void,
+): Unsubscribe {
   return onSnapshot(
     collection(db, 'rooms', id, 'members'),
     (s) => cb(s.docs.map((d) => ({ uid: d.id, ...d.data() }) as Member)),
@@ -115,7 +123,11 @@ export async function startVoting(id: string, found: CandidateDoc): Promise<void
   });
   b.update(roomRef(id), { status: 'voting', expected: room.memberCount });
   await b.commit();
-  record({ kind: 'firestore', feature: 'Start voting', detail: `Saved ${found.items.length} public options.` });
+  record({
+    kind: 'firestore',
+    feature: 'Start voting',
+    detail: `Saved ${found.items.length} public options.`,
+  });
 }
 
 export async function getCandidates(id: string): Promise<CandidateDoc | null> {

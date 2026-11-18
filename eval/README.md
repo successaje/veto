@@ -14,5 +14,5 @@ Two levels of checking:
 2. **On-device model** (`web/eval.html`, Android and iOS debug screens): note → on-device profile → matcher
    → compare with expected vetoes. Report recall, precision, exact sets and latency per platform.
 
-Grow the set to about 40 notes before tuning prompts. Include tricky negatives (someone who *likes* bars,
+Grow the set to about 40 notes before tuning prompts. Include tricky negatives (someone who _likes_ bars,
 "I'm fine with anything", allergies that do not matter for these places).

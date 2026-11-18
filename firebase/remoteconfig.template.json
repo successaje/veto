@@ -14,7 +14,7 @@
     "candidate_source": {
       "defaultValue": { "value": "fixture" },
       "valueType": "STRING",
-      "description": "'maps' = Gemini + Grounding with Google Maps; 'fixture' = eval/candidates.sample.json (demo-safe, no billing)."
+      "description": "'maps' = Gemini + Grounding with Google Maps (needs billing; falls back to the demo list on failure); 'fixture' = eval/candidates.sample.json."
     },
     "max_candidates": {
       "defaultValue": { "value": "10" },

@@ -155,7 +155,9 @@ AI (22 GB free disk; GPU with more than 4 GB VRAM, or 16 GB RAM). Check `chrome:
    works in every browser you test in. It is a secret: never commit it, and keep it out of `.env.local`,
    which production builds read. A production build fails if it finds one.
 
-Options come from a built-in demo list until you set Remote Config `candidate_source` to `maps`.
+Options come from a built-in demo list, labelled as made-up places, until you set Remote Config
+`candidate_source` to `maps`. Maps grounding needs a project with billing: see
+[docs/maps-grounding.md](docs/maps-grounding.md).
 
 ### Environment variables (`web/.env.local`, debug token in `web/.env.development.local`)
 
@@ -167,6 +169,7 @@ Options come from a built-in demo list until you set Remote Config `candidate_so
 | `VITE_FIREBASE_APP_ID`               | Yes               | same                                                                               |
 | `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` | Deployed builds   | App Check → your web app → reCAPTCHA Enterprise                                    |
 | `VITE_APPCHECK_DEBUG_TOKEN`          | Local development | Any UUID, registered under App Check → debug tokens; `.env.development.local` only |
+| `VITE_CANDIDATE_SOURCE`              | No                | `maps` or `fixture`; overrides Remote Config in `npm run dev` only                 |
 
 ### Tests
 
@@ -200,7 +203,8 @@ servers. With Homebrew's Java (keg-only), put it on the PATH first:
 - [x] Live Firebase project: cloud AI call and a full room verified end to end
 - [x] On-device eval page
 - [ ] On-device run on real hardware: structured output and eval numbers
-- [ ] Maps grounding on the free tier
+- [x] Maps grounding wired up: a source link for every place, labelled demo fallback
+- [ ] Maps grounding switched on (needs billing; no grounding quota on an unbilled project)
 - [ ] Android client
 - [ ] iOS client (joins rooms)
 - [ ] Eval numbers, hosted demo, video

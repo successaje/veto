@@ -3,6 +3,7 @@ import { joinRoom } from '../../../data/rooms';
 import { busy, button, field, linkButton, notice } from '../../../ui/components';
 import { h } from '../../../ui/dom';
 import type { RoomCtx } from './context';
+import { reportError } from '../../report';
 
 /** Shown to someone who opened the link but hasn't joined yet. */
 export function joinCard(ctx: RoomCtx): HTMLElement {
@@ -36,7 +37,8 @@ export function joinCard(ctx: RoomCtx): HTMLElement {
           displayName.set(name.value.trim());
           await joinRoom(ctx.id, name.value.trim() || 'Guest', hasProfile ? 'ai' : 'swipe');
           ctx.joined();
-        } catch {
+        } catch (e) {
+          reportError(e);
           error.replaceChildren(
             notice('error', 'Couldn’t join.', 'The vote may have just started. Refresh to check.'),
           );

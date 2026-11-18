@@ -7,6 +7,7 @@ import type { RoomSpec } from '../../domain/attrs';
 import { busy, button, field, notice, pageHead, sourceTag } from '../../ui/components';
 import { h } from '../../ui/dom';
 import { navigate, type ScreenContext } from '../router';
+import { reportError } from '../report';
 
 const EXAMPLE = 'Dinner Saturday 7pm near Riverside for 4, something relaxed';
 
@@ -27,7 +28,8 @@ export function homeScreen({ root }: ScreenContext): void {
           const { spec, source } = await parseRoomSpec(plan.value.trim() || EXAMPLE);
           details.replaceChildren(specForm(spec, source));
           details.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        } catch {
+        } catch (e) {
+          reportError(e);
           planError.replaceChildren(
             notice('error', 'Couldn’t read that plan.', 'Try again, or fill in the details yourself.'),
           );
@@ -175,7 +177,8 @@ function specForm(spec: RoomSpec, source: 'on_device' | 'in_cloud' | null): HTML
           });
           await joinRoom(id, name.value.trim() || 'Host', privateProfile.get() ? 'ai' : 'swipe');
           navigate(`/r/${id}`);
-        } catch {
+        } catch (e) {
+          reportError(e);
           error.replaceChildren(
             notice('error', 'The room wasn’t created.', 'Check your connection and try again.'),
           );

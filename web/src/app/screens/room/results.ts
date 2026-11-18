@@ -7,6 +7,7 @@ import { button, linkButton, notice, skeleton, sourceTag } from '../../../ui/com
 import { h } from '../../../ui/dom';
 import { icon } from '../../../ui/icons';
 import type { RoomCtx } from './context';
+import { reportError } from '../../report';
 
 /** After everyone has voted: the winner, why it works, and the other options that work. */
 export function results(ctx: RoomCtx): HTMLElement {
@@ -16,7 +17,8 @@ export function results(ctx: RoomCtx): HTMLElement {
     let tally;
     try {
       tally = await readTally(id);
-    } catch {
+    } catch (e) {
+      reportError(e);
       box.replaceChildren(
         notice(
           'error',
@@ -111,7 +113,8 @@ export function results(ctx: RoomCtx): HTMLElement {
     try {
       const ex = await explainWinner(win, room.spec);
       why.replaceChildren(h('p', {}, ex.text), h('div', {}, sourceTag(ex.source)));
-    } catch {
+    } catch (e) {
+      reportError(e);
       why.replaceChildren(h('p', { class: 'muted' }, win.evidence));
     }
   })();

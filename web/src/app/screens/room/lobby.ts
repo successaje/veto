@@ -4,6 +4,7 @@ import { startVoting } from '../../../data/rooms';
 import { busy, button, notice, steps, toast } from '../../../ui/components';
 import { h } from '../../../ui/dom';
 import type { RoomCtx } from './context';
+import { reportError } from '../../report';
 
 /** Before voting: the invite link, and the host's start button. */
 export function lobby({ id, room, members }: RoomCtx): HTMLElement {
@@ -44,7 +45,8 @@ export function lobby({ id, room, members }: RoomCtx): HTMLElement {
           progress.at(1);
           await startVoting(id, found);
           progress.at(2);
-        } catch {
+        } catch (e) {
+          reportError(e);
           status.replaceChildren(
             notice('error', 'The vote didn’t start.', 'Finding options failed. Try again in a moment.'),
           );

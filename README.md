@@ -35,7 +35,7 @@ The **What left my device** screen logs every AI call and database write.
 The on-device model only turns a messy private note into a structured profile, using a shared vocabulary
 ([`shared/attributes.v1.json`](shared/attributes.v1.json)) that the cloud also uses to describe places.
 Hard rules ("no raw fish", "step-free entrance", "under $20") are then applied by plain, tested code in
-[`web/src/matcher.ts`](web/src/matcher.ts), so they are predictable and identical on every platform. The
+[`web/src/domain/matcher.ts`](web/src/domain/matcher.ts), so they are predictable and identical on every platform. The
 model scores only soft preferences. Members can read and correct what their device understood.
 
 ### Guarding `ONLY_ON_DEVICE`
@@ -80,10 +80,13 @@ Run the web eval at `/eval.html`. The dataset is in [`eval/`](eval/): synthetic 
 shared/attributes.v1.json   vocabulary shared by cloud, device and every platform
 firebase/                   Firestore rules + rules tests, Remote Config template
 web/                        Chrome web app (Vite + TypeScript, no framework)
+  index.html                landing page (static, no Firebase)
+  app.html                  the app: /app, /app/note, /app/privacy, /r/:roomId
+  src/domain/               pure logic: vocabulary, hard-constraint matcher, tally and ranking
+  src/data/                 Firebase setup, rooms (one write per security rule), local notes, ledger
   src/ai/                   the five AI calls, on-device gate, schemas, prompts
-  src/matcher.ts            deterministic hard-constraint rules (unit-tested)
-  src/tally.ts              ballot → anonymous increments; ranking
-  src/rooms.ts              Firestore reads/writes, one per security rule
+  src/app/                  shell, History API router, device status, one module per screen
+  src/ui/                   DOM helper and shared views
 eval/                       synthetic notes, candidate fixtures, expected vetoes
 android/  ios/              native clients (see their READMEs)
 docs/                       threat model, demo script
@@ -100,7 +103,7 @@ AI (22 GB free disk; GPU with more than 4 GB VRAM, or 16 GB RAM). Check `chrome:
    The reCAPTCHA Enterprise site key is only needed for deployed builds; local development runs on the
    App Check debug token.
 3. Deploy rules and config: `npx firebase-tools deploy --only firestore:rules,remoteconfig --project <id>`
-4. Run: `cd web && npm install && npm run dev`
+4. Run: `cd web && npm install && npm run dev`, then open http://localhost:5173/app
 5. Put a UUID in `VITE_APPCHECK_DEBUG_TOKEN` (or copy the one the browser console prints) and add it under
    App Check → Apps → your web app → Manage debug tokens. A fixed token works in every browser you test
    in. Never commit it.

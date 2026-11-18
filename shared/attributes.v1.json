@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "maxCandidates": 10,
+  "foods": [
+    "raw_fish",
+    "shellfish",
+    "pork",
+    "beef",
+    "peanuts",
+    "tree_nuts",
+    "gluten",
+    "dairy",
+    "soft_cheese",
+    "eggs",
+    "spicy"
+  ],
+  "venueTypes": [
+    "bar_centric",
+    "fine_dining",
+    "fast_casual",
+    "cafe",
+    "outdoor_only",
+    "late_night"
+  ],
+  "dietTags": [
+    "vegetarian_friendly",
+    "vegan_friendly",
+    "halal",
+    "kosher",
+    "gluten_free_options",
+    "kid_friendly"
+  ],
+  "stepFree": ["yes", "limited", "no", "unknown"],
+  "noise": ["quiet", "moderate", "loud", "unknown"],
+  "alcoholFocus": ["low", "medium", "high", "unknown"]
+}

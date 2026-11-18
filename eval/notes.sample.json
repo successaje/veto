@@ -1,0 +1,102 @@
+{
+  "note": "Synthetic people, written by hand. Never put real private notes here. 'gold' is the profile a perfect model would extract; 'expectedVetoes' is what web/src/matcher.ts must produce from it against candidates.sample.json.",
+  "cases": [
+    {
+      "id": "priya",
+      "note": "I'm 14 weeks pregnant and haven't told anyone yet. No raw fish or soft unpasteurised cheese for me, and I'd rather not be somewhere that's mostly a bar.",
+      "gold": {
+        "hard": { "avoidFoods": ["raw_fish", "soft_cheese"], "avoidVenueTypes": ["bar_centric"], "needsStepFree": false, "stepFreeUnknown": "confirm", "maxPerPerson": null, "maxTravelMin": null, "avoidAlcoholFocus": false, "needsQuiet": false, "requireDietTags": [], "avoidNames": [] },
+        "soft": { "likes": [], "dislikes": [] },
+        "other": ""
+      },
+      "expectedVetoes": [0, 1, 5, 7, 9]
+    },
+    {
+      "id": "dev",
+      "note": "Money's tight until payday on the 15th. I can do about $20 a head, max.",
+      "gold": {
+        "hard": { "avoidFoods": [], "avoidVenueTypes": [], "needsStepFree": false, "stepFreeUnknown": "confirm", "maxPerPerson": 20, "maxTravelMin": null, "avoidAlcoholFocus": false, "needsQuiet": false, "requireDietTags": [], "avoidNames": [] },
+        "soft": { "likes": [], "dislikes": [] },
+        "other": ""
+      },
+      "expectedVetoes": [0, 1, 3, 4, 5, 7, 9]
+    },
+    {
+      "id": "sam",
+      "note": "Eight months sober. I'm fine with restaurants that serve drinks, just not places where drinking is the main thing.",
+      "gold": {
+        "hard": { "avoidFoods": [], "avoidVenueTypes": ["bar_centric"], "needsStepFree": false, "stepFreeUnknown": "confirm", "maxPerPerson": null, "maxTravelMin": null, "avoidAlcoholFocus": true, "needsQuiet": false, "requireDietTags": [], "avoidNames": [] },
+        "soft": { "likes": [], "dislikes": [] },
+        "other": ""
+      },
+      "expectedVetoes": [1, 5, 9]
+    },
+    {
+      "id": "lena",
+      "note": "I use a wheelchair, so I need a step-free entrance and an accessible restroom. If nobody knows whether a place is accessible, I'd rather skip it.",
+      "gold": {
+        "hard": { "avoidFoods": [], "avoidVenueTypes": [], "needsStepFree": true, "stepFreeUnknown": "veto", "maxPerPerson": null, "maxTravelMin": null, "avoidAlcoholFocus": false, "needsQuiet": false, "requireDietTags": [], "avoidNames": [] },
+        "soft": { "likes": [], "dislikes": [] },
+        "other": ""
+      },
+      "expectedVetoes": [1, 3, 5, 7, 9]
+    },
+    {
+      "id": "lena-calls-ahead",
+      "note": "I use a wheelchair. Step-free entrance please. If access is unclear I'm happy to call ahead.",
+      "gold": {
+        "hard": { "avoidFoods": [], "avoidVenueTypes": [], "needsStepFree": true, "stepFreeUnknown": "confirm", "maxPerPerson": null, "maxTravelMin": null, "avoidAlcoholFocus": false, "needsQuiet": false, "requireDietTags": [], "avoidNames": [] },
+        "soft": { "likes": [], "dislikes": [] },
+        "other": ""
+      },
+      "expectedVetoes": [1, 7]
+    },
+    {
+      "id": "omar",
+      "note": "Halal only. I'm on call tonight, so nothing more than 15 minutes away.",
+      "gold": {
+        "hard": { "avoidFoods": [], "avoidVenueTypes": [], "needsStepFree": false, "stepFreeUnknown": "confirm", "maxPerPerson": null, "maxTravelMin": 15, "avoidAlcoholFocus": false, "needsQuiet": false, "requireDietTags": ["halal"], "avoidNames": [] },
+        "soft": { "likes": [], "dislikes": [] },
+        "other": ""
+      },
+      "expectedVetoes": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    },
+    {
+      "id": "mei",
+      "note": "Loud places give me migraines lately. Also my ex works at The Tap Room, so not there.",
+      "gold": {
+        "hard": { "avoidFoods": [], "avoidVenueTypes": [], "needsStepFree": false, "stepFreeUnknown": "confirm", "maxPerPerson": null, "maxTravelMin": null, "avoidAlcoholFocus": false, "needsQuiet": true, "requireDietTags": [], "avoidNames": ["The Tap Room"] },
+        "soft": { "likes": [], "dislikes": [] },
+        "other": ""
+      },
+      "expectedVetoes": [1, 6, 9]
+    },
+    {
+      "id": "jonah",
+      "note": "Coeliac. I need proper gluten-free options, not just 'we can try'.",
+      "gold": {
+        "hard": { "avoidFoods": [], "avoidVenueTypes": [], "needsStepFree": false, "stepFreeUnknown": "confirm", "maxPerPerson": null, "maxTravelMin": null, "avoidAlcoholFocus": false, "needsQuiet": false, "requireDietTags": ["gluten_free_options"], "avoidNames": [] },
+        "soft": { "likes": [], "dislikes": [] },
+        "other": ""
+      },
+      "expectedVetoes": [0, 1, 3, 4, 5, 6, 7, 9]
+    },
+    {
+      "id": "ana",
+      "note": "Vegan, and I love spicy food.",
+      "gold": {
+        "hard": { "avoidFoods": [], "avoidVenueTypes": [], "needsStepFree": false, "stepFreeUnknown": "confirm", "maxPerPerson": null, "maxTravelMin": null, "avoidAlcoholFocus": false, "needsQuiet": false, "requireDietTags": ["vegan_friendly"], "avoidNames": [] },
+        "soft": { "likes": ["spicy food"], "dislikes": [] },
+        "other": ""
+      },
+      "expectedVetoes": [0, 1, 3, 4, 5, 6, 7, 8, 9]
+    }
+  ],
+  "groups": [
+    {
+      "id": "dinner-for-four",
+      "members": ["priya", "dev", "sam", "lena"],
+      "expectedOpen": [2, 6, 8]
+    }
+  ]
+}

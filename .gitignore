@@ -1,0 +1,25 @@
+node_modules/
+dist/
+.firebase/
+*.log
+.DS_Store
+
+# Secrets and per-developer config: never commit these
+.env
+.env.local
+.env.*.local
+*debug-token*
+service-account*.json
+.firebaserc
+
+# Native Firebase config files: keep out of the public repo; document how to add them
+android/app/google-services.json
+ios/**/GoogleService-Info.plist
+
+# Android / iOS build output
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+ios/**/xcuserdata/
+ios/**/DerivedData/

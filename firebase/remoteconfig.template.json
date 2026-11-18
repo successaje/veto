@@ -1,0 +1,40 @@
+{
+  "conditions": [],
+  "parameters": {
+    "cloud_model": {
+      "defaultValue": { "value": "gemini-3.8-flash" },
+      "valueType": "STRING",
+      "description": "Cloud model for finding and normalizing candidates. Free tier at time of writing."
+    },
+    "cloud_model_lite": {
+      "defaultValue": { "value": "gemini-3.5-flash-lite" },
+      "valueType": "STRING",
+      "description": "Cloud fallback for PREFER_ON_DEVICE helpers (room helper, explanation)."
+    },
+    "candidate_source": {
+      "defaultValue": { "value": "fixture" },
+      "valueType": "STRING",
+      "description": "'maps' = Gemini + Grounding with Google Maps; 'fixture' = eval/candidates.sample.json (demo-safe, no billing)."
+    },
+    "max_candidates": {
+      "defaultValue": { "value": "10" },
+      "valueType": "NUMBER",
+      "description": "Must stay <= 10: the tally document and security rules have 10 slots."
+    },
+    "attr_version": {
+      "defaultValue": { "value": "1" },
+      "valueType": "NUMBER",
+      "description": "Version of shared/attributes.v1.json both sides must agree on."
+    },
+    "prompt_profile": {
+      "defaultValue": { "value": "" },
+      "valueType": "STRING",
+      "description": "Override for the on-device 'understand my note' prompt. Empty = built-in prompt."
+    },
+    "prompt_fit": {
+      "defaultValue": { "value": "" },
+      "valueType": "STRING",
+      "description": "Override for the on-device soft-fit scoring prompt. Empty = built-in prompt."
+    }
+  }
+}

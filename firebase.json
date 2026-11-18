@@ -1,0 +1,22 @@
+{
+  "firestore": {
+    "rules": "firebase/firestore.rules",
+    "indexes": "firebase/firestore.indexes.json"
+  },
+  "hosting": {
+    "public": "web/dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [{ "source": "**", "destination": "/index.html" }]
+  },
+  "remoteconfig": {
+    "template": "firebase/remoteconfig.template.json"
+  },
+  "auth": {
+    "providers": { "anonymous": true }
+  },
+  "emulators": {
+    "firestore": { "port": 8180 },
+    "auth": { "port": 9099 },
+    "ui": { "enabled": true }
+  }
+}

@@ -1,0 +1,181 @@
+rules_version = '2';
+
+// Veto's privacy promise, enforced by the database:
+//   - A member's vote is only ever stored as anonymous increments to one shared tally.
+//   - Each member can vote exactly once (a content-free ballot doc proves it).
+//   - Nobody, including the host, can read the tally until every member has voted,
+//     so nobody can diff the counters after each vote to work out who vetoed what.
+//   - Private notes and reasons never reach Firestore at all; there is no field for them.
+//
+// Write shapes (see web/src/rooms.ts):
+//   create room:  batch { set rooms/{r}, set rooms/{r}/tally/main (all zeros) }
+//   join:         batch { set members/{uid}, update rooms/{r}.memberCount += 1 }
+//   start voting: batch { set public/candidates, update rooms/{r} {status:'voting', expected} }
+//   vote:         batch { set ballots/{uid}, update tally/main (+increments), update rooms/{r}.submitted += 1 }
+//   reveal:       update rooms/{r} {status:'results'} once submitted == expected
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function me() { return request.auth.uid; }
+
+    function roomPath(r) { return /databases/$(database)/documents/rooms/$(r); }
+    function memberPath(r, u) { return /databases/$(database)/documents/rooms/$(r)/members/$(u); }
+    function ballotPath(r, u) { return /databases/$(database)/documents/rooms/$(r)/ballots/$(u); }
+    function tallyPath(r) { return /databases/$(database)/documents/rooms/$(r)/tally/main; }
+    function candidatesPath(r) { return /databases/$(database)/documents/rooms/$(r)/public/candidates; }
+
+    function roomData(r) { return get(roomPath(r)).data; }
+    function isMember(r) { return signedIn() && exists(memberPath(r, me())); }
+
+    // This request creates my ballot (and I had none before).
+    function castsMyBallot(r) {
+      return !exists(ballotPath(r, me())) && existsAfter(ballotPath(r, me()));
+    }
+
+    function tallyKeys() {
+      return ['v0', 'v1', 'v2', 'v3', 'v4', 'v5', 'v6', 'v7', 'v8', 'v9',
+              's0', 's1', 's2', 's3', 's4', 's5', 's6', 's7', 's8', 's9',
+              'submitted'];
+    }
+
+    function isZeroTally(d) {
+      return d.keys().hasAll(tallyKeys()) && d.keys().hasOnly(tallyKeys())
+        && d.v0 == 0 && d.v1 == 0 && d.v2 == 0 && d.v3 == 0 && d.v4 == 0
+        && d.v5 == 0 && d.v6 == 0 && d.v7 == 0 && d.v8 == 0 && d.v9 == 0
+        && d.s0 == 0 && d.s1 == 0 && d.s2 == 0 && d.s3 == 0 && d.s4 == 0
+        && d.s5 == 0 && d.s6 == 0 && d.s7 == 0 && d.s8 == 0 && d.s9 == 0
+        && d.submitted == 0;
+    }
+
+    // One candidate's change within one ballot is either a veto (v+1, s+0)
+    // or a score (v+0, s+0..3). Never both, never more.
+    function okPair(i) {
+      let vk = 'v' + string(i);
+      let sk = 's' + string(i);
+      let dv = request.resource.data[vk] - resource.data[vk];
+      let ds = request.resource.data[sk] - resource.data[sk];
+      return (dv == 1 && ds == 0) || (dv == 0 && ds >= 0 && ds <= 3);
+    }
+
+    function allPairsOk() {
+      return okPair(0) && okPair(1) && okPair(2) && okPair(3) && okPair(4)
+        && okPair(5) && okPair(6) && okPair(7) && okPair(8) && okPair(9);
+    }
+
+    match /rooms/{r} {
+      // The room id is an unguessable capability; anyone holding the link can see the public spec.
+      allow read: if signedIn();
+
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(
+             ['hostUid', 'spec', 'status', 'memberCount', 'expected', 'submitted', 'attrVersion', 'createdAt'])
+        && request.resource.data.hostUid == me()
+        && request.resource.data.status == 'lobby'
+        && request.resource.data.memberCount == 0
+        && request.resource.data.expected == 0
+        && request.resource.data.submitted == 0;
+
+      function changes(keys) {
+        return request.resource.data.diff(resource.data).affectedKeys().hasOnly(keys);
+      }
+
+      // A member joins: memberCount +1 in the same batch that creates their member doc.
+      function isJoin() {
+        return resource.data.status == 'lobby'
+          && changes(['memberCount'])
+          && request.resource.data.memberCount == resource.data.memberCount + 1
+          && !exists(memberPath(r, me()))
+          && existsAfter(memberPath(r, me()));
+      }
+
+      // A member votes: submitted +1 in the same batch that creates their ballot.
+      function isVote() {
+        return resource.data.status == 'voting'
+          && changes(['submitted'])
+          && request.resource.data.submitted == resource.data.submitted + 1
+          && isMember(r)
+          && castsMyBallot(r);
+      }
+
+      // The host closes the lobby and opens voting once candidates exist.
+      function isStartVoting() {
+        return resource.data.hostUid == me()
+          && resource.data.status == 'lobby'
+          && resource.data.memberCount > 0
+          && request.resource.data.status == 'voting'
+          && request.resource.data.expected == resource.data.memberCount
+          && changes(['status', 'expected'])
+          && existsAfter(candidatesPath(r));
+      }
+
+      // Anyone in the room may reveal results once everyone has voted.
+      function isReveal() {
+        return resource.data.status == 'voting'
+          && resource.data.submitted == resource.data.expected
+          && request.resource.data.status == 'results'
+          && changes(['status'])
+          && isMember(r);
+      }
+
+      allow update: if signedIn() && (isJoin() || isVote() || isStartVoting() || isReveal());
+      allow delete: if false;
+
+      match /members/{u} {
+        allow read: if isMember(r);
+        allow create: if signedIn() && u == me()
+          && roomData(r).status == 'lobby'
+          && getAfter(roomPath(r)).data.memberCount == roomData(r).memberCount + 1
+          && request.resource.data.keys().hasOnly(['name', 'platform', 'mode', 'joinedAt'])
+          && request.resource.data.name is string
+          && request.resource.data.name.size() <= 40
+          && request.resource.data.mode in ['ai', 'swipe'];
+        allow update, delete: if false;
+      }
+
+      // Public candidate list, written by the host's cloud call. Only public data lives here.
+      match /public/{docId} {
+        allow read: if isMember(r);
+        allow create, update: if docId == 'candidates'
+          && signedIn()
+          && roomData(r).hostUid == me()
+          && roomData(r).status == 'lobby'
+          && request.resource.data.keys().hasOnly(['items', 'source', 'attributions', 'createdAt'])
+          && request.resource.data.items is list
+          && request.resource.data.items.size() >= 2
+          && request.resource.data.items.size() <= 10;
+        allow delete: if false;
+      }
+
+      match /tally/{t} {
+        allow create: if t == 'main'
+          && signedIn()
+          && getAfter(roomPath(r)).data.hostUid == me()
+          && getAfter(roomPath(r)).data.status == 'lobby'
+          && isZeroTally(request.resource.data);
+        // Hidden until everyone has voted: no peeking, no diffing.
+        allow read: if isMember(r) && roomData(r).status == 'results';
+        allow update: if t == 'main'
+          && isMember(r)
+          && roomData(r).status == 'voting'
+          && castsMyBallot(r)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(tallyKeys())
+          && request.resource.data.submitted == resource.data.submitted + 1
+          && allPairsOk();
+        allow delete: if false;
+      }
+
+      // Content-free proof that a member has voted. Nobody can read it back.
+      match /ballots/{u} {
+        allow create: if signedIn() && u == me()
+          && isMember(r)
+          && roomData(r).status == 'voting'
+          && request.resource.data.keys().hasOnly(['at'])
+          && getAfter(tallyPath(r)).data.submitted == get(tallyPath(r)).data.submitted + 1
+          && getAfter(roomPath(r)).data.submitted == roomData(r).submitted + 1;
+        allow read, update, delete: if false;
+      }
+    }
+  }
+}

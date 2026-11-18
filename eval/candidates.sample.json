@@ -1,0 +1,76 @@
+{
+  "source": "fixture",
+  "note": "Fictional venues in a fictional neighbourhood. Used for the eval and as a demo-safe candidate source (Remote Config candidate_source = 'fixture').",
+  "items": [
+    {
+      "i": 0, "name": "Kumo Sushi Bar", "area": "Riverside",
+      "priceBand": 3, "estPerPerson": 45, "travelMin": 12,
+      "stepFree": "yes", "noise": "moderate", "alcoholFocus": "medium",
+      "servesHeavily": ["raw_fish"], "dietTags": [], "venueTypes": [],
+      "evidence": "Omakase-style sushi counter; most of the menu is raw fish. Level entrance from the street."
+    },
+    {
+      "i": 1, "name": "The Tap Room", "area": "Riverside",
+      "priceBand": 2, "estPerPerson": 25, "travelMin": 8,
+      "stepFree": "no", "noise": "loud", "alcoholFocus": "high",
+      "servesHeavily": ["beef"], "dietTags": ["vegetarian_friendly"], "venueTypes": ["bar_centric", "late_night"],
+      "evidence": "Craft beer bar with burgers; two steps at the door; busy and loud after 8pm."
+    },
+    {
+      "i": 2, "name": "Green Bowl", "area": "Riverside",
+      "priceBand": 1, "estPerPerson": 15, "travelMin": 10,
+      "stepFree": "yes", "noise": "quiet", "alcoholFocus": "low",
+      "servesHeavily": [], "dietTags": ["vegetarian_friendly", "vegan_friendly", "gluten_free_options"], "venueTypes": ["fast_casual"],
+      "evidence": "Build-your-own grain and noodle bowls, clearly labelled vegan and gluten-free; calm room with step-free entry."
+    },
+    {
+      "i": 3, "name": "Trattoria Nonna", "area": "Old Town",
+      "priceBand": 2, "estPerPerson": 30, "travelMin": 15,
+      "stepFree": "unknown", "noise": "moderate", "alcoholFocus": "medium",
+      "servesHeavily": ["gluten", "dairy"], "dietTags": ["vegetarian_friendly", "kid_friendly"], "venueTypes": [],
+      "evidence": "Family-run pasta and pizza place; good for groups; no access information found."
+    },
+    {
+      "i": 4, "name": "Saffron House", "area": "Market Street",
+      "priceBand": 2, "estPerPerson": 22, "travelMin": 20,
+      "stepFree": "yes", "noise": "moderate", "alcoholFocus": "low",
+      "servesHeavily": ["spicy"], "dietTags": ["vegetarian_friendly", "halal"], "venueTypes": [],
+      "evidence": "Halal-certified North Indian kitchen with a large vegetarian section; ramp at the side entrance."
+    },
+    {
+      "i": 5, "name": "Oyster & Ash", "area": "Harbour",
+      "priceBand": 4, "estPerPerson": 80, "travelMin": 18,
+      "stepFree": "limited", "noise": "moderate", "alcoholFocus": "high",
+      "servesHeavily": ["shellfish", "raw_fish"], "dietTags": [], "venueTypes": ["fine_dining"],
+      "evidence": "Raw bar and wood-fired seafood with a long wine list; dining room is up a half-flight, lift on request."
+    },
+    {
+      "i": 6, "name": "Taco Lucha", "area": "Riverside",
+      "priceBand": 1, "estPerPerson": 14, "travelMin": 6,
+      "stepFree": "yes", "noise": "loud", "alcoholFocus": "medium",
+      "servesHeavily": ["pork"], "dietTags": ["vegetarian_friendly"], "venueTypes": ["fast_casual", "late_night"],
+      "evidence": "Counter-service tacos, al pastor is the signature; music is loud; open late."
+    },
+    {
+      "i": 7, "name": "Fromage Bistro", "area": "Old Town",
+      "priceBand": 3, "estPerPerson": 50, "travelMin": 25,
+      "stepFree": "no", "noise": "quiet", "alcoholFocus": "medium",
+      "servesHeavily": ["soft_cheese", "dairy"], "dietTags": ["vegetarian_friendly"], "venueTypes": ["fine_dining"],
+      "evidence": "French bistro known for raw-milk cheese boards and fondue; basement dining room down a staircase."
+    },
+    {
+      "i": 8, "name": "Pho Corner", "area": "Market Street",
+      "priceBand": 1, "estPerPerson": 16, "travelMin": 9,
+      "stepFree": "yes", "noise": "moderate", "alcoholFocus": "low",
+      "servesHeavily": ["beef"], "dietTags": ["gluten_free_options"], "venueTypes": [],
+      "evidence": "Vietnamese noodle shop; rice-noodle pho is naturally gluten-free; quick and inexpensive."
+    },
+    {
+      "i": 9, "name": "Rooftop 9", "area": "Harbour",
+      "priceBand": 3, "estPerPerson": 40, "travelMin": 14,
+      "stepFree": "unknown", "noise": "loud", "alcoholFocus": "high",
+      "servesHeavily": [], "dietTags": [], "venueTypes": ["bar_centric", "outdoor_only"],
+      "evidence": "Cocktail bar on a ninth-floor terrace with small plates; DJ on weekends."
+    }
+  ]
+}

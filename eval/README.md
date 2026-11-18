@@ -9,7 +9,7 @@ Synthetic people and fictional places only. Never add a real person's note.
 
 Two levels of checking:
 
-1. **Labels and rules** (`web/src/matcher.test.ts`, runs in CI): gold profiles → matcher → expected vetoes.
+1. **Labels and rules** (`web/src/domain/matcher.test.ts`, runs in CI): gold profiles → matcher → expected vetoes.
    Every platform's matcher port must pass these same cases.
 2. **On-device model** (`web/eval.html`, Android and iOS debug screens): note → on-device profile → matcher
    → compare with expected vetoes. Report recall, precision, exact sets and latency per platform.

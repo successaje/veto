@@ -25,8 +25,8 @@ Put `google-services.json` in `android/app/` (git-ignored).
 - Vocabulary: `../shared/attributes.v1.json`.
 - Firestore layout and write shapes: see the header of `../firebase/firestore.rules`. Every write must
   match one of those shapes exactly or the rules reject it.
-- Ballot → increments and ranking: port `../web/src/tally.ts`.
-- Hard rules: port `../web/src/matcher.ts`, and run every case in `../eval/notes.sample.json` as a unit
+- Ballot → increments and ranking: port `../web/src/domain/tally.ts`.
+- Hard rules: port `../web/src/domain/matcher.ts`, and run every case in `../eval/notes.sample.json` as a unit
   test (gold profile → expected vetoes). The ports must agree exactly.
 - Room links: `https://<project>.web.app/r/<roomId>` (set up App Links for this path).
 

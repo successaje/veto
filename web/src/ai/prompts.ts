@@ -1,7 +1,7 @@
 // Built-in prompts. The two private ones can be overridden from Remote Config
 // (prompt_profile, prompt_fit) without shipping a new build.
 
-import { ATTRS } from '../attrs';
+import { ATTRS } from '../domain/attrs';
 
 export const SPEC_SYSTEM = `You turn a host's message about a group outing into public room details.
 Only use what the message says. If something is missing, write a short sensible placeholder

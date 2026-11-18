@@ -2,7 +2,7 @@
 // (generationConfig.responseJsonSchema). Kept deliberately simple so the same shapes work with
 // Android @Generable and Apple @Generable: no nullable unions; -1 means "unknown/none".
 
-import { ATTRS } from '../attrs';
+import { ATTRS } from '../domain/attrs';
 
 const str = (maxLength = 80) => ({ type: 'string', maxLength });
 const enumArr = (values: readonly string[], maxItems = 8) => ({

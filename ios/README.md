@@ -27,7 +27,7 @@ results. Hosting stays on web/Android. Needs an iPhone with Apple Intelligence (
 ## The contract
 
 Same as Android: `../shared/attributes.v1.json`, the write shapes in `../firebase/firestore.rules`,
-ports of `../web/src/tally.ts` and `../web/src/matcher.ts`, and the cases in `../eval/notes.sample.json`
+ports of `../web/src/domain/tally.ts` and `../web/src/domain/matcher.ts`, and the cases in `../eval/notes.sample.json`
 as unit tests. Room links: `https://<project>.web.app/r/<roomId>` (Universal Links).
 
 App Check: App Attest provider, debug provider for development. `GoogleService-Info.plist` is git-ignored.

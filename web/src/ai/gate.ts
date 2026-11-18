@@ -7,7 +7,7 @@
 // assertDeviceReady() first and assertRanOnDevice() after.
 
 import type { GenerativeModel } from 'firebase/ai';
-import { record } from '../ledger';
+import { record } from '../data/ledger';
 
 export type DeviceState = 'no-api' | 'unavailable' | 'downloadable' | 'downloading' | 'available';
 

@@ -1,10 +1,10 @@
 // The five AI calls. Every call records what it sent (or that nothing left) in the ledger.
 
-import type { Candidate, PrivateProfile, RoomSpec } from '../attrs';
-import { cfg } from '../firebase';
-import { record, words } from '../ledger';
-import { hardCheck, type HardResult } from '../matcher';
-import type { Choice } from '../tally';
+import type { Candidate, PrivateProfile, RoomSpec } from '../domain/attrs';
+import { cfg } from '../data/firebase';
+import { record, words } from '../data/ledger';
+import { hardCheck, type HardResult } from '../domain/matcher';
+import type { Choice } from '../domain/tally';
 import fixture from '../../../eval/candidates.sample.json';
 import { assertDeviceReady, assertRanOnDevice, deviceState } from './gate';
 import { cloudOnly, onDeviceOnly, preferDevice } from './models';

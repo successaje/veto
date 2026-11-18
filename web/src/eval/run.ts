@@ -3,13 +3,13 @@
 
 import notesFile from '../../../eval/notes.sample.json';
 import candidatesFile from '../../../eval/candidates.sample.json';
-import type { Candidate } from '../attrs';
+import type { Candidate } from '../domain/attrs';
 import { understandNote } from '../ai/features';
 import { deviceState, downloadPrivateModel } from '../ai/gate';
 import { onDeviceOnly } from '../ai/models';
 import { PROFILE_SYSTEM } from '../ai/prompts';
-import { ready } from '../firebase';
-import { vetoSet } from '../matcher';
+import { ready } from '../data/firebase';
+import { vetoSet } from '../domain/matcher';
 
 const candidates = candidatesFile.items as Candidate[];
 const out = document.querySelector<HTMLPreElement>('#out')!;

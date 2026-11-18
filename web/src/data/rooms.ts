@@ -11,10 +11,10 @@ import {
   writeBatch,
   type Unsubscribe,
 } from 'firebase/firestore';
-import { ATTRS, type Candidate, type RoomSpec } from './attrs';
+import { ATTRS, type Candidate, type RoomSpec } from '../domain/attrs';
 import { db, uid } from './firebase';
 import { record } from './ledger';
-import { ballotIncrements, zeroTally, type Choice, type TallyDoc } from './tally';
+import { ballotIncrements, zeroTally, type Choice, type TallyDoc } from '../domain/tally';
 
 export type RoomStatus = 'lobby' | 'voting' | 'results';
 

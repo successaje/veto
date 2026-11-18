@@ -13,6 +13,20 @@ everyone, and nobody had to explain anything.
 Built for [#BuildHybridAI 2026](https://firebasehybridaihackathon.devpost.com/) with
 [Firebase AI Logic](https://firebase.google.com/docs/ai-logic/hybrid) hybrid inference.
 
+## How it works
+
+1. **The host describes the plan** ("dinner Saturday near Riverside, relaxed") and shares a link.
+2. **Each member writes a private note once** (pregnant, sober, under $30, no stairs, not the Tap Room). Their
+   device turns it into limits they can check and correct. The note never leaves the device.
+3. **The cloud finds up to ten real places** from the public plan only.
+4. **Each device decides privately.** Code rules out places that break a limit; the on-device model ranks
+   the rest. The member sees their own result, then sends one vote made of anonymous +1s. No device AI?
+   They vote by hand: every option starts at "Fine" and they change only what matters.
+5. **When the last vote lands, everyone sees the winner** and how many options didn't work for someone.
+   Nobody learns who ruled what out, or why.
+
+The product model, with every flow and error state, is in [docs/product.md](docs/product.md).
+
 ## How Veto uses Firebase AI Logic
 
 Each feature has its own model instance and inference mode. All five calls live in
@@ -27,8 +41,9 @@ Each feature has its own model instance and inference mode. All five calls live 
 | 4   | Private fit check                                                          | Each member | Plain code + `ONLY_ON_DEVICE`                | Private profile + public options | Private: reasons never leave the device                              |
 | 5   | Explain the pick                                                           | Anyone      | `PREFER_ON_DEVICE`                           | Public facts about the winner    | Public; on device when possible                                      |
 
-Every answer shows where it ran (🔒 on this device / ☁️ cloud), read from `response.inferenceSource`.
-The **What left my device** screen logs every AI call and database write.
+Every AI answer is tagged with where it ran ("On this device" or "Cloud"), read from
+`response.inferenceSource`. The **What left this device** screen (`/app/privacy`) logs every AI call and
+database write, so anyone can check that the note never appears.
 
 ### "The model reads; code decides"
 
@@ -48,12 +63,12 @@ never fall back to the cloud.
 
 ## Privacy model
 
-| Data                                   | Where it lives                            | Who can see it                                    |
-| -------------------------------------- | ----------------------------------------- | ------------------------------------------------- |
-| Private note and profile               | This browser's local storage              | Only you                                          |
-| Your reasons ("✗ centres on raw fish") | This browser                              | Only you                                          |
-| Room details (title, area, time, vibe) | Firestore; sent to Gemini to find options | The room, Google                                  |
-| Your vote                              | Anonymous increments to one shared tally  | Nobody until everyone has voted, then only totals |
+| Data                                    | Where it lives                            | Who can see it                                    |
+| --------------------------------------- | ----------------------------------------- | ------------------------------------------------- |
+| Private note and profile                | This browser's local storage              | Only you                                          |
+| Your verdicts ("not for you: raw fish") | This browser                              | Only you                                          |
+| Room details (title, area, time, vibe)  | Firestore; sent to Gemini to find options | The room, Google                                  |
+| Your vote                               | Anonymous increments to one shared tally  | Nobody until everyone has voted, then only totals |
 
 The database enforces this ([`firebase/firestore.rules`](firebase/firestore.rules)):
 
@@ -74,6 +89,32 @@ See [docs/threat-model.md](docs/threat-model.md) for what this does and does not
 
 Run the web eval at `/eval.html`. The dataset is in [`eval/`](eval/): synthetic people only.
 
+## Architecture
+
+```
+/            landing page  (static HTML, no Firebase, ~1 KB of JS)
+/app, /r/:id the app       (Vite + TypeScript, no framework)
+
+app/   shell, router, screens ─┐
+ui/    design-system components │ render
+                               ▼
+ai/    five AI calls ── gate.ts: on-device check before, inferenceSource check after
+domain/ vocabulary · matcher (hard rules) · tally (ballot → +1s, ranking)   ← pure, unit-tested
+data/  Firebase init · rooms (one write shape per security rule) · local notes · ledger
+                               ▼
+Firestore  rooms/{id} · members · public/candidates · ballots (content-free) · tally/main
+           enforced by firebase/firestore.rules, tested against the emulator in CI
+```
+
+- **No server code.** Security rules carry every guarantee, so Veto runs on the Spark plan.
+- **One vocabulary** ([`shared/attributes.v1.json`](shared/attributes.v1.json)) is used by cloud prompts,
+  on-device prompts, the matcher and every platform. Android and iOS port `domain/` and must pass the same
+  cases.
+- **Remote Config** holds model names and the candidate source, so models can change without a release.
+- **App Check** (reCAPTCHA Enterprise on web) protects the AI and Firestore endpoints.
+
+Design decisions and the component inventory are in [docs/design.md](docs/design.md).
+
 ## Repository layout
 
 ```
@@ -86,10 +127,12 @@ web/                        Chrome web app (Vite + TypeScript, no framework)
   src/data/                 Firebase setup, rooms (one write per security rule), local notes, ledger
   src/ai/                   the five AI calls, on-device gate, schemas, prompts
   src/app/                  shell, History API router, device status, one module per screen
-  src/ui/                   DOM helper and shared views
+  src/ui/                   DOM helper, icons, design-system components
+  src/styles/               tokens, base, components, app and landing styles
 eval/                       synthetic notes, candidate fixtures, expected vetoes
 android/  ios/              native clients (see their READMEs)
-docs/                       threat model, demo script
+docs/                       product model, design system, threat model, demo script, build log
+.github/                    CI (format, types, tests, build, rules) and the PR template
 ```
 
 ## Run it
@@ -110,12 +153,34 @@ AI (22 GB free disk; GPU with more than 4 GB VRAM, or 16 GB RAM). Check `chrome:
 
 Options come from a built-in demo list until you set Remote Config `candidate_source` to `maps`.
 
-Tests:
+### Environment variables (`web/.env.local`)
+
+| Variable                             | Required          | Where it comes from                                 |
+| ------------------------------------ | ----------------- | --------------------------------------------------- |
+| `VITE_FIREBASE_API_KEY`              | Yes               | `firebase apps:sdkconfig WEB`                       |
+| `VITE_FIREBASE_AUTH_DOMAIN`          | Yes               | same                                                |
+| `VITE_FIREBASE_PROJECT_ID`           | Yes               | same                                                |
+| `VITE_FIREBASE_APP_ID`               | Yes               | same                                                |
+| `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` | Deployed builds   | App Check → your web app → reCAPTCHA Enterprise     |
+| `VITE_APPCHECK_DEBUG_TOKEN`          | Local development | Any UUID, registered under App Check → debug tokens |
+
+### Tests
 
 ```bash
-cd web && npm test                          # matcher, tally, eval-label consistency
-cd firebase && npm install && npm run test:rules   # security rules (needs Java 21+)
+npm install && npm run check                 # format, types, unit tests (matcher, tally, labels, rooms), build
+cd firebase && npm install && npm run test:rules   # security rules against the emulator (Java 21+)
 ```
+
+CI runs both on every pull request ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+
+### Deploy
+
+```bash
+npm --prefix web run build
+npx firebase-tools deploy --only hosting,firestore:rules,remoteconfig,auth --project <id>
+```
+
+Hosting serves the landing page at `/` and rewrites `/app/**` and `/r/**` to the app.
 
 The Firestore emulator runs on port 8180, not the usual 8080, so it doesn't collide with other local
 servers. With Homebrew's Java (keg-only), put it on the PATH first:
@@ -124,10 +189,14 @@ servers. With Homebrew's Java (keg-only), put it on the PATH first:
 ## Status
 
 - [x] Shared vocabulary, deterministic matcher, tally and ranking (unit-tested)
-- [x] Firestore security rules with tests for every privacy guarantee
-- [x] Web app: rooms, private note, five AI calls, manual voting fallback, results, ledger
+- [x] Firestore security rules with tests for every privacy guarantee, run in CI
+- [x] Web app: rooms, private note with a profile editor, five AI calls, one-tap manual voting, results,
+      your rooms, privacy log, offline state
+- [x] Design system and landing page
+- [x] Live Firebase project: cloud AI call and a full room verified end to end
 - [x] On-device eval page
-- [ ] Day-1 spike on real hardware: on-device structured output, Maps grounding on the free tier
+- [ ] On-device run on real hardware: structured output and eval numbers
+- [ ] Maps grounding on the free tier
 - [ ] Android client
 - [ ] iOS client (joins rooms)
 - [ ] Eval numbers, hosted demo, video

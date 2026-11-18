@@ -7,6 +7,8 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_APP_ID: string;
   readonly VITE_RECAPTCHA_ENTERPRISE_SITE_KEY: string;
   readonly VITE_APPCHECK_DEBUG_TOKEN?: string;
+  /** Dev only: overrides Remote Config candidate_source ('maps' or 'fixture'). */
+  readonly VITE_CANDIDATE_SOURCE?: string;
 }
 
 interface ImportMeta {

@@ -7,6 +7,7 @@ import { hardCheck, type HardResult } from '../domain/matcher';
 import type { Choice } from '../domain/tally';
 import fixture from '../../../eval/candidates.sample.json';
 import { assertDeviceReady, assertRanOnDevice, deviceState } from './gate';
+import { attachSources, mapsSources } from './maps';
 import { cloudOnly, onDeviceOnly, preferDevice } from './models';
 import { parseJson, sanitizeCandidates, sanitizeProfile, sanitizeScores } from './normalize';
 import {
@@ -18,6 +19,7 @@ import {
   SPEC_SYSTEM,
 } from './prompts';
 import { candidatesSchema, fitSchema, profileSchema, specSchema } from './schemas';
+import { reportError } from '../app/report';
 
 export type Source = 'on_device' | 'in_cloud';
 
@@ -51,55 +53,87 @@ export async function parseRoomSpec(message: string): Promise<{ spec: RoomSpec; 
 
 export interface FoundCandidates {
   items: Candidate[];
-  source: 'maps' | 'fixture';
-  /** Google Maps sources. When present, they must be displayed (Grounding with Google Maps terms). */
+  /** 'fallback' = Maps was switched on but failed, so the room got the demo list instead. */
+  source: 'maps' | 'fixture' | 'fallback';
+  /** Google Maps sources of the options. Shown next to them, as the Maps terms require. */
   attributions: { title: string; uri: string }[];
 }
 
+/** Grounding returns at least this many real places, or the demo list is used instead. */
+const MIN_PLACES = 3;
+
 export async function findCandidates(spec: RoomSpec): Promise<FoundCandidates> {
   const max = cfg.maxCandidates();
-  if (cfg.candidateSource() === 'fixture') {
-    record({
-      kind: 'local',
-      feature: 'Find options',
-      detail: 'Used the built-in demo list. Nothing sent to AI.',
-    });
-    return { items: (fixture.items as Candidate[]).slice(0, max), source: 'fixture', attributions: [] };
+  if (cfg.candidateSource() === 'maps') {
+    try {
+      return await fromMaps(spec, max);
+    } catch (e) {
+      // Usually quota: grounding needs a billed project. A room must never get stuck on it.
+      reportError(e);
+      record({
+        kind: 'local',
+        feature: 'Find options',
+        detail: 'Google Maps search didn’t work, so the room got the built-in demo list.',
+      });
+      return demoList(max, 'fallback');
+    }
   }
+  record({
+    kind: 'local',
+    feature: 'Find options',
+    detail: 'Used the built-in demo list. Nothing sent to AI.',
+  });
+  return demoList(max, 'fixture');
+}
 
+function demoList(max: number, source: 'fixture' | 'fallback'): FoundCandidates {
+  return { items: (fixture.items as Candidate[]).slice(0, max), source, attributions: [] };
+}
+
+async function fromMaps(spec: RoomSpec, max: number): Promise<FoundCandidates> {
   const publicAsk = `Group outing: ${spec.title}. Area: ${spec.area}. When: ${spec.when}. People: ${spec.groupSize}. Vibe: ${spec.vibe}.`;
 
   // Step 1: grounded search. Tools and a response schema are kept in separate calls on purpose.
-  const grounded = await cloudOnly({
-    system: CANDIDATE_SEARCH_SYSTEM,
-    tools: [{ googleMaps: {} }],
-    toolConfig:
-      spec.lat != null && spec.lng != null
-        ? { retrievalConfig: { latLng: { latitude: spec.lat, longitude: spec.lng } } }
-        : undefined,
-  }).generateContent(publicAsk);
-  const found = grounded.response.text();
-  const chunks = grounded.response.candidates?.[0]?.groundingMetadata?.groundingChunks ?? [];
-  const attributions = chunks
-    .map((c) => c.maps)
-    .filter((m): m is NonNullable<typeof m> => !!m?.uri)
-    .map((m) => ({ title: m.title ?? 'Google Maps', uri: m.uri!, placeId: m.placeId }));
+  let grounded;
+  try {
+    grounded = await cloudOnly({
+      system: CANDIDATE_SEARCH_SYSTEM,
+      tools: [{ googleMaps: {} }],
+      toolConfig:
+        spec.lat != null && spec.lng != null
+          ? { retrievalConfig: { latLng: { latitude: spec.lat, longitude: spec.lng } } }
+          : undefined,
+    }).generateContent(publicAsk);
+  } finally {
+    // The request left the device whether or not it succeeded.
+    record({
+      kind: 'cloud-ai',
+      feature: 'Find options',
+      detail: `Sent the room's public details (${words(publicAsk)} words) to Gemini with Google Maps. No one's private notes.`,
+    });
+  }
+  const sources = mapsSources(grounded.response.candidates?.[0]?.groundingMetadata?.groundingChunks);
+  if (sources.length < MIN_PLACES) throw new Error(`Google Maps returned ${sources.length} places`);
 
-  // Step 2: normalise into the shared vocabulary.
+  // Step 2: normalise into the shared vocabulary, then keep only options with a Maps source.
   const normalised = await cloudOnly({ system: NORMALIZE_SYSTEM, schema: candidatesSchema }).generateContent(
-    found,
+    grounded.response.text(),
   );
-  const items = sanitizeCandidates(parseJson(normalised.response.text()), max).map((c) => {
-    const hit = attributions.find((a) => a.title.toLowerCase() === c.name.toLowerCase());
-    return hit ? { ...c, placeId: hit.placeId, mapsUri: hit.uri } : c;
-  });
-
+  const items = attachSources(sanitizeCandidates(parseJson(normalised.response.text()), 10), sources).slice(
+    0,
+    max,
+  );
+  if (items.length < MIN_PLACES) throw new Error(`Only ${items.length} options matched a Maps source`);
   record({
     kind: 'cloud-ai',
     feature: 'Find options',
-    detail: `Sent the room's public details (${words(publicAsk)} words) to Gemini with Google Maps. No one's private notes.`,
+    detail: `Sent the places Google Maps found (${words(grounded.response.text())} words) to Gemini to describe them in the shared vocabulary.`,
   });
-  return { items, source: 'maps', attributions: attributions.map(({ title, uri }) => ({ title, uri })) };
+  return {
+    items,
+    source: 'maps',
+    attributions: items.map((c) => ({ title: c.name, uri: c.mapsUri! })),
+  };
 }
 
 // 3. Understand my note (ONLY_ON_DEVICE, private) ----------------------------------------------

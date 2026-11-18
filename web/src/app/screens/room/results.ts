@@ -2,7 +2,7 @@ import { explainWinner } from '../../../ai/features';
 import { myDecision } from '../../../data/notes';
 import { getCandidates, readTally } from '../../../data/rooms';
 import { rank } from '../../../domain/tally';
-import { optionItem, optionList } from '../../../ui/candidate';
+import { mapsLink, optionItem, optionList, placesNote } from '../../../ui/candidate';
 import { button, linkButton, notice, skeleton, sourceTag } from '../../../ui/components';
 import { h } from '../../../ui/dom';
 import { icon } from '../../../ui/icons';
@@ -33,7 +33,9 @@ export function results(ctx: RoomCtx): HTMLElement {
       );
       return;
     }
-    const items = candidates?.items ?? (await getCandidates(id))?.items ?? [];
+    const list = candidates ?? (await getCandidates(id));
+    const items = list?.items ?? [];
+    const source = list?.source;
     const rk = rank(tally, items.length);
     box.removeAttribute('aria-busy');
     const ruledOut = h(
@@ -86,6 +88,7 @@ export function results(ctx: RoomCtx): HTMLElement {
           ),
           h('h2', { style: 'font-size: var(--text-2xl)' }, win.name),
           h('p', { class: 'muted' }, [win.area, '$'.repeat(win.priceBand)].filter(Boolean).join(' · ')),
+          win.mapsUri ? mapsLink(win.mapsUri) : null,
           why,
           mine?.confirm.length
             ? notice(
@@ -108,6 +111,7 @@ export function results(ctx: RoomCtx): HTMLElement {
               optionList(...others.map((i) => optionItem(items[i]))),
             )
           : null,
+        placesNote(source),
       ),
     );
     try {

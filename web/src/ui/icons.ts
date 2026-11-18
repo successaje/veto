@@ -25,6 +25,8 @@ const PATHS = {
     '<ellipse cx="12" cy="6" rx="7" ry="2.5" /><path d="M5 6v12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5V6M5 12c0 1.4 3.1 2.5 7 2.5s7-1.1 7-2.5" />',
   device: '<rect x="6" y="2.5" width="12" height="19" rx="2.5" /><path d="M11 18.5h2" />',
   ban: '<circle cx="12" cy="12" r="9" /><path d="m5.6 5.6 12.8 12.8" />',
+  mapPin:
+    '<path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11Z" /><circle cx="12" cy="10" r="2.5" />',
 } as const;
 
 export type IconName = keyof typeof PATHS;

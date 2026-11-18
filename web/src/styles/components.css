@@ -390,6 +390,33 @@ select:focus-visible {
   margin-top: 0.15rem;
   flex: none;
 }
+.option-source {
+  align-self: flex-start;
+  color: var(--ink-3);
+}
+.option-source:hover {
+  color: var(--ink);
+}
+/* Google Maps attribution: plain, unwrapped, never restyled into something else. */
+.maps-attr {
+  font-family: Roboto, system-ui, sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+}
+.places-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+}
+.places-note .icon {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.15rem;
+  flex: none;
+}
 .option.is-out .option-name {
   text-decoration: line-through;
   text-decoration-color: var(--accent);

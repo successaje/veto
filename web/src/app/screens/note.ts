@@ -1,14 +1,14 @@
 import type { DeviceState } from '../../ai/gate';
 import { understandNote } from '../../ai/features';
 import { PrivateAIUnavailable } from '../../ai/gate';
-import { sanitizeProfile } from '../../ai/normalize';
 import { privateNote, privateProfile } from '../../data/notes';
 import { emptyProfile, type PrivateProfile } from '../../domain/attrs';
-import { busy, button, field, notice, pageHead, sourceTag, toast } from '../../ui/components';
+import { busy, button, field, notice, pageHead, toast } from '../../ui/components';
 import { h } from '../../ui/dom';
 import { icon } from '../../ui/icons';
 import { deviceNow, enablePrivateAI, onDeviceState } from '../device-status';
 import { refresh, type ScreenContext } from '../router';
+import { profileEditor } from './profile-editor';
 
 /** The private note and the profile the device extracted from it. Nothing here is uploaded. */
 export function noteScreen({ root, onCleanup }: ScreenContext): void {
@@ -21,46 +21,11 @@ export function noteScreen({ root, onCleanup }: ScreenContext): void {
   const out = h('div', { class: 'stack' });
 
   const showProfile = (p: PrivateProfile, source: 'on_device' | null) => {
-    const json = h('textarea', {
-      rows: 14,
-      class: 'mono',
-      value: JSON.stringify(p, null, 2),
-      spellcheck: false,
-    });
-    const status = h('div');
     out.replaceChildren(
-      h(
-        'div',
-        { class: 'panel stack enter' },
-        h(
-          'div',
-          { class: 'spread' },
-          h('h2', { style: 'font-size: var(--text-lg)' }, 'What your device understood'),
-          source ? sourceTag(source) : null,
-        ),
-        h('p', { class: 'small muted' }, 'Fix anything that’s wrong. This stays in this browser.'),
-        json,
-        status,
-        h(
-          'div',
-          {},
-          button('Save on this device', {
-            variant: 'primary',
-            icon: 'check',
-            onClick: () => {
-              try {
-                privateProfile.set(sanitizeProfile(JSON.parse(json.value)));
-                status.replaceChildren();
-                toast('Saved on this device');
-              } catch {
-                status.replaceChildren(
-                  notice('error', 'That isn’t valid JSON.', 'Check for a missing comma or quote.'),
-                );
-              }
-            },
-          }),
-        ),
-      ),
+      profileEditor(p, source, (saved) => {
+        privateProfile.set(saved);
+        toast('Saved on this device');
+      }),
     );
   };
 

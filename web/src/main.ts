@@ -1,5 +1,5 @@
 import './style.css';
-import { emptyProfile, type Candidate, type PrivateProfile, type RoomSpec } from './attrs';
+import { emptyProfile, type Candidate, type PrivateProfile, type RoomSpec } from './domain/attrs';
 import {
   decidePrivately,
   explainWinner,
@@ -12,9 +12,9 @@ import { deviceState, downloadPrivateModel, PrivateAIUnavailable, type DeviceSta
 import { onDeviceOnly } from './ai/models';
 import { PROFILE_SYSTEM } from './ai/prompts';
 import { sanitizeProfile } from './ai/normalize';
-import { ready, uid } from './firebase';
-import { clearLedger, entries, onLedgerChange, type LedgerEntry } from './ledger';
-import { displayName, myDecision, privateNote, privateProfile } from './notes';
+import { ready, uid } from './data/firebase';
+import { clearLedger, entries, onLedgerChange, type LedgerEntry } from './data/ledger';
+import { displayName, myDecision, privateNote, privateProfile } from './data/notes';
 import {
   createRoom,
   getCandidates,
@@ -29,8 +29,8 @@ import {
   type CandidateDoc,
   type Member,
   type Room,
-} from './rooms';
-import { rank, type Choice } from './tally';
+} from './data/rooms';
+import { rank, type Choice } from './domain/tally';
 
 // ---------- tiny DOM helper ----------
 type Child = Node | string | number | null | undefined | false;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import candidatesFile from '../../eval/candidates.sample.json';
-import notesFile from '../../eval/notes.sample.json';
+import candidatesFile from '../../../eval/candidates.sample.json';
+import notesFile from '../../../eval/notes.sample.json';
 import type { Candidate, PrivateProfile } from './attrs';
 import { hardCheck, vetoSet } from './matcher';
 import { ballotIncrements, rank, zeroTally } from './tally';

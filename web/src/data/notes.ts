@@ -1,9 +1,9 @@
 // Private note and profile storage. These live in this browser's localStorage only.
 // Nothing in this file talks to the network, and nothing else should copy these values out.
 
-import type { Choice } from './tally';
-import type { HardResult } from './matcher';
-import { emptyProfile, type PrivateProfile } from './attrs';
+import type { Choice } from '../domain/tally';
+import type { HardResult } from '../domain/matcher';
+import { emptyProfile, type PrivateProfile } from '../domain/attrs';
 
 const NOTE = 'veto.private.note';
 const PROFILE = 'veto.private.profile';

@@ -19,7 +19,7 @@ import {
   writeBatch,
   type Firestore,
 } from 'firebase/firestore';
-import { ballotIncrements, rank, zeroTally, type Choice } from '../../web/src/tally';
+import { ballotIncrements, rank, zeroTally, type Choice } from '../../web/src/domain/tally';
 
 const RULES = readFileSync(new URL('../firestore.rules', import.meta.url), 'utf8');
 const RID = 'r1';

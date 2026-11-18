@@ -1,6 +1,6 @@
 // The shared vocabulary. The cloud describes candidates with it; your device describes
 // your private needs with it; plain code compares the two. Android and iOS read the same file.
-import vocab from '../../shared/attributes.v1.json';
+import vocab from '../../../shared/attributes.v1.json';
 
 export const ATTRS = vocab;
 

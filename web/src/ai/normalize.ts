@@ -1,6 +1,6 @@
 // Pure clean-up of model output. Small models drift; never trust raw JSON from either side.
 
-import { ATTRS, emptyProfile, type Candidate, type PrivateProfile } from '../attrs';
+import { ATTRS, emptyProfile, type Candidate, type PrivateProfile } from '../domain/attrs';
 
 type Json = Record<string, unknown>;
 

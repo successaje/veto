@@ -17,7 +17,7 @@ import {
   type Tool,
   type ToolConfig,
 } from 'firebase/ai';
-import { ai, cfg } from '../firebase';
+import { ai, cfg } from '../data/firebase';
 import { TEXT_ONLY } from './gate';
 
 function systemPrompt(text: string) {

@@ -10,6 +10,9 @@ everyone, and nobody had to explain anything.
 
 > The cloud knows the world. Your device knows you.
 
+**Live:** [veto-hybrid-ai.web.app](https://veto-hybrid-ai.web.app) · Private checks need desktop Chrome
+with on-device AI; any browser can vote by hand.
+
 Built for [#BuildHybridAI 2026](https://firebasehybridaihackathon.devpost.com/) with
 [Firebase AI Logic](https://firebase.google.com/docs/ai-logic/hybrid) hybrid inference.
 

@@ -1,4 +1,6 @@
 import { uid } from '../../../data/firebase';
+import { myRooms } from '../../../data/my-rooms';
+import { myDecision } from '../../../data/notes';
 import {
   getCandidates,
   isMember,
@@ -82,6 +84,16 @@ export async function roomScreen({ root, params, onCleanup }: ScreenContext): Pr
         render();
       },
     };
+    if (member) {
+      myRooms.remember({
+        id,
+        title: room.spec.title,
+        when: room.spec.when,
+        status: room.status,
+        voted: myDecision.get(id).voted,
+        host: room.hostUid === uid(),
+      });
+    }
     const phase = !member
       ? joinCard(ctx)
       : room.status === 'lobby'

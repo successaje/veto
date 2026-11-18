@@ -7,6 +7,7 @@ const room = (id: string, extra: Partial<RoomSummary> = {}): RoomSummary => ({
   when: '',
   status: 'lobby',
   voted: false,
+  host: false,
   seenAt: 0,
   ...extra,
 });

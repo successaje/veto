@@ -10,6 +10,8 @@ export interface RoomSummary {
   status: RoomStatus;
   /** Whether this browser has sent its vote. */
   voted: boolean;
+  /** Whether this browser started the room. */
+  host: boolean;
   /** Last time this room was seen, ms since epoch. */
   seenAt: number;
 }

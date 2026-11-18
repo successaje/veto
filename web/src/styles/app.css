@@ -110,6 +110,24 @@
   }
 }
 
+.offline-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--gutter);
+  background: var(--warn-soft);
+  color: var(--ink);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+.offline-banner[hidden] {
+  display: none;
+}
+.offline-banner .icon {
+  color: var(--warn);
+}
+
 /* ---------- page frame ---------- */
 .app-main {
   max-width: var(--page-wide);

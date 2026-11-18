@@ -1,4 +1,6 @@
 import { parseRoomSpec } from '../../ai/features';
+import { myRooms, nextAction, NEXT_LABEL, type RoomSummary } from '../../data/my-rooms';
+import { icon } from '../../ui/icons';
 import { displayName, privateProfile } from '../../data/notes';
 import { createRoom, joinRoom } from '../../data/rooms';
 import type { RoomSpec } from '../../domain/attrs';
@@ -10,6 +12,7 @@ const EXAMPLE = 'Dinner Saturday 7pm near Riverside for 4, something relaxed';
 
 /** Start a plan (host) or open an invite (member). */
 export function homeScreen({ root }: ScreenContext): void {
+  const rooms = myRooms.list();
   const plan = h('textarea', { rows: 3, placeholder: EXAMPLE });
   const details = h('div');
   const planError = h('div');
@@ -68,6 +71,7 @@ export function homeScreen({ root }: ScreenContext): void {
       h(
         'aside',
         { class: 'stack', style: '--stack: var(--s-6)' },
+        rooms.length ? yourRooms(rooms) : null,
         h(
           'div',
           { class: 'stack', style: '--stack: var(--s-3)' },
@@ -76,21 +80,60 @@ export function homeScreen({ root }: ScreenContext): void {
           inviteError,
           button('Open room', { onClick: openInvite, iconAfter: 'arrowRight' }),
         ),
-        h('hr', { class: 'divider' }),
-        h(
-          'div',
-          { class: 'stack small', style: '--stack: var(--s-2)' },
-          h('p', { class: 'eyebrow' }, 'How it works'),
-          h(
-            'ol',
-            { class: 'stack muted', style: '--stack: var(--s-2); margin: 0; padding-left: 1.1rem' },
-            h('li', {}, 'You describe the plan and share a link.'),
-            h('li', {}, 'Each person’s device checks the options against their private note.'),
-            h('li', {}, 'Only anonymous counts are shared. The group sees what works for everyone.'),
-          ),
-        ),
+        rooms.length
+          ? null
+          : h(
+              'div',
+              { class: 'stack small', style: '--stack: var(--s-2)' },
+              h('hr', { class: 'divider' }),
+              h('p', { class: 'eyebrow' }, 'How it works'),
+              h(
+                'ol',
+                { class: 'stack muted', style: '--stack: var(--s-2); margin: 0; padding-left: 1.1rem' },
+                h('li', {}, 'You describe the plan and share a link.'),
+                h('li', {}, 'Each person’s device checks the options against their private note.'),
+                h('li', {}, 'Only anonymous counts are shared. The group sees what works for everyone.'),
+              ),
+            ),
       ),
     ),
+  );
+}
+
+/** Rooms this device joined or started, with the member's next step. Stored locally only. */
+function yourRooms(rooms: RoomSummary[]): HTMLElement {
+  return h(
+    'section',
+    { class: 'stack', style: '--stack: var(--s-3)', 'aria-label': 'Your rooms' },
+    h('h2', { style: 'font-size: var(--text-lg)' }, 'Your rooms'),
+    h(
+      'ul',
+      { class: 'options' },
+      ...rooms.slice(0, 6).map((r) => {
+        const next = nextAction(r, r.host);
+        const urgent = next === 'decide' || next === 'start';
+        return h(
+          'li',
+          { class: 'option', style: 'padding: var(--s-3) 0' },
+          h(
+            'a',
+            { href: `/r/${r.id}`, class: 'spread', style: 'text-decoration: none' },
+            h(
+              'span',
+              { class: 'stack', style: '--stack: 0' },
+              h('span', { style: 'font-weight: 650' }, r.title || 'Untitled plan'),
+              h(
+                'span',
+                { class: 'small', style: `color: ${urgent ? 'var(--accent)' : 'var(--ink-3)'}` },
+                [NEXT_LABEL[next], r.when].filter(Boolean).join(' · '),
+              ),
+            ),
+            icon('chevronRight'),
+          ),
+        );
+      }),
+    ),
+    h('p', { class: 'small muted' }, 'Kept on this device only.'),
   );
 }
 

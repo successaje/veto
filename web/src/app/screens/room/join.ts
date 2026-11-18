@@ -17,7 +17,7 @@ export function joinCard(ctx: RoomCtx): HTMLElement {
         ? 'Your private profile on this device will decide for you. Nothing about it is shared.'
         : 'Tip: add a private note first so your device can decide for you. Or just vote by hand.',
     ),
-    !hasProfile && h('a', { href: '#/note' }, 'Write my private note'),
+    !hasProfile && h('a', { href: '/app/note' }, 'Write my private note'),
     name,
     h(
       'button',

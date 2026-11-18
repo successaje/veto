@@ -6,7 +6,12 @@
   "hosting": {
     "public": "web/dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [{ "source": "**", "destination": "/index.html" }]
+    "cleanUrls": true,
+    "rewrites": [
+      { "source": "/app", "destination": "/app.html" },
+      { "source": "/app/**", "destination": "/app.html" },
+      { "source": "/r/**", "destination": "/app.html" }
+    ]
   },
   "remoteconfig": {
     "template": "firebase/remoteconfig.template.json"

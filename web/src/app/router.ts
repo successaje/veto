@@ -34,11 +34,26 @@ export function route(path: string, screen: Screen): void {
 
 /** The current in-app path. */
 export function currentPath(): string {
-  return location.hash.replace(/^#/, '') || '/';
+  return location.pathname.replace(/\/+$/, '') || '/';
 }
 
-export function navigate(path: string): void {
-  location.hash = path;
+export function navigate(path: string, { replace = false } = {}): void {
+  if (path === currentPath()) return;
+  if (replace) history.replaceState(null, '', path);
+  else history.pushState(null, '', path);
+  render();
+  window.scrollTo(0, 0);
+}
+
+/** Same-origin links to app routes navigate in place instead of reloading the page. */
+function interceptLinks(event: MouseEvent): void {
+  if (event.defaultPrevented || event.button !== 0) return;
+  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+  const a = (event.target as Element | null)?.closest('a');
+  if (!a || a.target || a.hasAttribute('download') || a.origin !== location.origin) return;
+  if (!routes.some((r) => r.pattern.test(a.pathname.replace(/\/+$/, '') || '/'))) return;
+  event.preventDefault();
+  navigate(a.pathname);
 }
 
 function render(): void {
@@ -63,6 +78,7 @@ export const refresh = render;
 export function startRouter(root: HTMLElement, fallback: Screen): void {
   outlet = root;
   notFound = fallback;
-  window.addEventListener('hashchange', render);
+  window.addEventListener('popstate', render);
+  document.addEventListener('click', interceptLinks);
   render();
 }

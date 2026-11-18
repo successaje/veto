@@ -8,9 +8,10 @@ import { noteScreen } from './screens/note';
 import { privacyScreen } from './screens/privacy';
 import { roomScreen } from './screens/room';
 
-route('/', homeScreen);
-route('/note', noteScreen);
-route('/ledger', privacyScreen);
+// Room links are real paths (/r/<id>) so Android App Links and iOS Universal Links can claim them.
+route('/app', homeScreen);
+route('/app/note', noteScreen);
+route('/app/privacy', privacyScreen);
 route('/r/:roomId', roomScreen);
 
 const root = document.querySelector<HTMLDivElement>('#app')!;
@@ -19,21 +20,17 @@ root.append(
   h(
     'header',
     {},
-    h('a', { href: '#/', class: 'logo' }, 'Veto'),
+    h('a', { href: '/app', class: 'logo' }, 'Veto'),
     h(
       'nav',
       {},
-      h('a', { href: '#/note' }, 'My private note'),
-      h('a', { href: '#/ledger' }, 'What left my device'),
+      h('a', { href: '/app/note' }, 'My private note'),
+      h('a', { href: '/app/privacy' }, 'What left my device'),
     ),
     devicePill,
   ),
   main,
 );
-
-// Shareable links use a real path (/r/<id>) so Android App Links and iOS Universal Links can claim them.
-const pathRoom = location.pathname.match(/^\/r\/([A-Za-z0-9]+)/)?.[1];
-if (pathRoom) history.replaceState(null, '', `/#/r/${pathRoom}`);
 
 void (async () => {
   await refreshDeviceState(); // on-device status doesn't need the network

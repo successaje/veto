@@ -8,9 +8,17 @@
       content="Pick a place that works for everyone, without anyone having to explain why."
     />
     <title>Veto</title>
+    <script>
+      // Links shared before the move to real URLs used hashes (/#/r/<id>). Send them to the app.
+      const legacy = location.hash.match(/^#\/(r\/[A-Za-z0-9]+|note|ledger)?/);
+      if (legacy) {
+        const path =
+          { note: '/app/note', ledger: '/app/privacy' }[legacy[1]] ?? (legacy[1] ? '/' + legacy[1] : '/app');
+        location.replace(path);
+      } else location.replace('/app');
+    </script>
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/app/main.ts"></script>
+    <p><a href="/app">Open Veto</a></p>
   </body>
 </html>

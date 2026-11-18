@@ -5,23 +5,24 @@ import { initializeFirestore } from 'firebase/firestore';
 import { fetchAndActivate, getRemoteConfig, getValue } from 'firebase/remote-config';
 import { getAI, GoogleAIBackend } from 'firebase/ai';
 
-const env = import.meta.env;
-
+// Read each variable directly from import.meta.env. Aliasing the object (`const env = import.meta.env`)
+// makes Vite inline every VITE_ variable into the bundle, including the App Check debug token.
 export const app = initializeApp({
-  apiKey: env.VITE_FIREBASE_API_KEY,
-  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: env.VITE_FIREBASE_PROJECT_ID,
-  appId: env.VITE_FIREBASE_APP_ID,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 });
 
-// App Check is mandatory for Firebase AI Logic. In development, the SDK prints a debug
-// token to the console; register it in the Firebase console (App Check > Manage debug tokens).
-// Never commit a debug token.
-if (env.DEV) {
+// App Check protects Firebase AI Logic and Firestore. In development a registered debug token
+// stands in for reCAPTCHA. It lives in .env.development.local, which production builds never load,
+// and this branch is compiled out of production builds. vite.config.ts fails a production build
+// that sees one anyway. Never commit a debug token.
+if (import.meta.env.DEV) {
   (self as unknown as { FIREBASE_APPCHECK_DEBUG_TOKEN: string | boolean }).FIREBASE_APPCHECK_DEBUG_TOKEN =
-    env.VITE_APPCHECK_DEBUG_TOKEN || true;
+    import.meta.env.VITE_APPCHECK_DEBUG_TOKEN || true;
 }
-const siteKey = env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY;
+const siteKey = import.meta.env.VITE_RECAPTCHA_ENTERPRISE_SITE_KEY;
 initializeAppCheck(app, {
   // Without a site key (early local development) only the registered debug token passes App Check.
   provider: siteKey
@@ -38,7 +39,7 @@ export const db = initializeFirestore(app, { ignoreUndefinedProperties: true });
 export const ai = getAI(app, { backend: new GoogleAIBackend() });
 
 const rc = getRemoteConfig(app);
-rc.settings.minimumFetchIntervalMillis = env.DEV ? 0 : 60 * 60 * 1000;
+rc.settings.minimumFetchIntervalMillis = import.meta.env.DEV ? 0 : 60 * 60 * 1000;
 rc.defaultConfig = {
   cloud_model: 'gemini-3.8-flash',
   cloud_model_lite: 'gemini-3.5-flash-lite',

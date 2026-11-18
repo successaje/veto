@@ -147,22 +147,23 @@ AI (22 GB free disk; GPU with more than 4 GB VRAM, or 16 GB RAM). Check `chrome:
    App Check debug token.
 3. Deploy rules and config: `npx firebase-tools deploy --only firestore:rules,remoteconfig --project <id>`
 4. Run: `cd web && npm install && npm run dev`, then open http://localhost:5173/app
-5. Put a UUID in `VITE_APPCHECK_DEBUG_TOKEN` (or copy the one the browser console prints) and add it under
-   App Check → Apps → your web app → Manage debug tokens. A fixed token works in every browser you test
-   in. Never commit it.
+5. Put a UUID in `VITE_APPCHECK_DEBUG_TOKEN` in `web/.env.development.local` (or copy the one the browser
+   console prints) and add it under App Check → Apps → your web app → Manage debug tokens. A fixed token
+   works in every browser you test in. It is a secret: never commit it, and keep it out of `.env.local`,
+   which production builds read. A production build fails if it finds one.
 
 Options come from a built-in demo list until you set Remote Config `candidate_source` to `maps`.
 
-### Environment variables (`web/.env.local`)
+### Environment variables (`web/.env.local`, debug token in `web/.env.development.local`)
 
-| Variable                             | Required          | Where it comes from                                 |
-| ------------------------------------ | ----------------- | --------------------------------------------------- |
-| `VITE_FIREBASE_API_KEY`              | Yes               | `firebase apps:sdkconfig WEB`                       |
-| `VITE_FIREBASE_AUTH_DOMAIN`          | Yes               | same                                                |
-| `VITE_FIREBASE_PROJECT_ID`           | Yes               | same                                                |
-| `VITE_FIREBASE_APP_ID`               | Yes               | same                                                |
-| `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` | Deployed builds   | App Check → your web app → reCAPTCHA Enterprise     |
-| `VITE_APPCHECK_DEBUG_TOKEN`          | Local development | Any UUID, registered under App Check → debug tokens |
+| Variable                             | Required          | Where it comes from                                                                |
+| ------------------------------------ | ----------------- | ---------------------------------------------------------------------------------- |
+| `VITE_FIREBASE_API_KEY`              | Yes               | `firebase apps:sdkconfig WEB`                                                      |
+| `VITE_FIREBASE_AUTH_DOMAIN`          | Yes               | same                                                                               |
+| `VITE_FIREBASE_PROJECT_ID`           | Yes               | same                                                                               |
+| `VITE_FIREBASE_APP_ID`               | Yes               | same                                                                               |
+| `VITE_RECAPTCHA_ENTERPRISE_SITE_KEY` | Deployed builds   | App Check → your web app → reCAPTCHA Enterprise                                    |
+| `VITE_APPCHECK_DEBUG_TOKEN`          | Local development | Any UUID, registered under App Check → debug tokens; `.env.development.local` only |
 
 ### Tests
 

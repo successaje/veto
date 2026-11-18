@@ -1,95 +1,189 @@
+import type { DeviceState } from '../../ai/gate';
 import { understandNote } from '../../ai/features';
 import { PrivateAIUnavailable } from '../../ai/gate';
 import { sanitizeProfile } from '../../ai/normalize';
 import { privateNote, privateProfile } from '../../data/notes';
 import { emptyProfile, type PrivateProfile } from '../../domain/attrs';
+import { busy, button, field, notice, pageHead, sourceTag, toast } from '../../ui/components';
 import { h } from '../../ui/dom';
+import { icon } from '../../ui/icons';
+import { deviceNow, enablePrivateAI, onDeviceState } from '../device-status';
 import { refresh, type ScreenContext } from '../router';
 
 /** The private note and the profile the device extracted from it. Nothing here is uploaded. */
-export function noteScreen({ root }: ScreenContext): void {
+export function noteScreen({ root, onCleanup }: ScreenContext): void {
   const note = h('textarea', {
-    rows: 5,
+    rows: 6,
     value: privateNote.get(),
     placeholder:
-      "What should the group's choice work around? e.g. I'm sober, budget about $20, need step-free access…",
+      'I’m pregnant, so no raw fish or soft cheese. Budget about $30. My knee is bad, so no stairs. Not the Tap Room.',
   });
-  const out = h('div');
-  const showProfile = (p: PrivateProfile) => {
-    const json = h('textarea', { rows: 14, class: 'mono', value: JSON.stringify(p, null, 2) });
+  const out = h('div', { class: 'stack' });
+
+  const showProfile = (p: PrivateProfile, source: 'on_device' | null) => {
+    const json = h('textarea', {
+      rows: 14,
+      class: 'mono',
+      value: JSON.stringify(p, null, 2),
+      spellcheck: false,
+    });
+    const status = h('div');
     out.replaceChildren(
-      h('h3', {}, "Here's what your device understood"),
-      h('p', { class: 'muted' }, 'Fix anything that is wrong. This stays in this browser.'),
-      json,
       h(
-        'button',
-        {
-          class: 'primary',
-          onclick: () => {
-            try {
-              privateProfile.set(sanitizeProfile(JSON.parse(json.value)));
-              out.append(h('p', { class: 'ok' }, 'Saved on this device.'));
-            } catch {
-              out.append(h('p', { class: 'err' }, 'That is not valid JSON.'));
-            }
-          },
-        },
-        'Looks right',
+        'div',
+        { class: 'panel stack enter' },
+        h(
+          'div',
+          { class: 'spread' },
+          h('h2', { style: 'font-size: var(--text-lg)' }, 'What your device understood'),
+          source ? sourceTag(source) : null,
+        ),
+        h('p', { class: 'small muted' }, 'Fix anything that’s wrong. This stays in this browser.'),
+        json,
+        status,
+        h(
+          'div',
+          {},
+          button('Save on this device', {
+            variant: 'primary',
+            icon: 'check',
+            onClick: () => {
+              try {
+                privateProfile.set(sanitizeProfile(JSON.parse(json.value)));
+                status.replaceChildren();
+                toast('Saved on this device');
+              } catch {
+                status.replaceChildren(
+                  notice('error', 'That isn’t valid JSON.', 'Check for a missing comma or quote.'),
+                );
+              }
+            },
+          }),
+        ),
       ),
     );
   };
 
+  const read = button('Read my note on this device', {
+    variant: 'primary',
+    icon: 'lock',
+    onClick: () =>
+      void busy(read, 'Reading on this device…', async () => {
+        privateNote.set(note.value);
+        try {
+          showProfile(await understandNote(note.value), 'on_device');
+        } catch (e) {
+          if (e instanceof PrivateAIUnavailable) {
+            showProfile(privateProfile.get() ?? emptyProfile(), null);
+            out.prepend(
+              notice(
+                'warn',
+                'This browser can’t run private AI.',
+                'Your note was not sent anywhere. Fill in your limits by hand below, or vote by hand in each room.',
+              ),
+            );
+          } else
+            out.replaceChildren(
+              notice('error', 'Reading your note failed.', 'Nothing was sent anywhere. Try again.'),
+            );
+        }
+      }),
+  });
+  const remove = button('Delete my note', {
+    variant: 'ghost',
+    icon: 'trash',
+    onClick: () => {
+      privateNote.set('');
+      privateProfile.set(null);
+      toast('Deleted from this device', 'trash');
+      refresh();
+    },
+  });
+
   root.append(
+    pageHead(
+      'Your private note',
+      'Only your device knows',
+      'Write what the group’s choice has to work around. It’s stored in this browser and read by the AI model on this device. It is never uploaded.',
+    ),
     h(
-      'section',
-      {},
-      h('h2', {}, 'Only my device knows'),
+      'div',
+      { class: 'split' },
       h(
-        'p',
-        { class: 'muted' },
-        'Write what matters to you. It is stored in this browser and read by the AI model on this device only. It is never uploaded.',
+        'section',
+        { class: 'stack', style: '--stack: var(--s-6)' },
+        h(
+          'div',
+          { class: 'panel stack' },
+          field(
+            'Your note',
+            note,
+            'Food, budget, access, places to avoid: anything you’d rather not explain.',
+          ),
+          h('div', { class: 'cluster' }, read, privateNote.get() || privateProfile.get() ? remove : null),
+        ),
+        out,
       ),
-      note,
-      h(
-        'button',
-        {
-          class: 'primary',
-          onclick: async () => {
-            privateNote.set(note.value);
-            out.replaceChildren(h('p', { class: 'muted' }, 'Reading on this device…'));
-            try {
-              showProfile(await understandNote(note.value));
-            } catch (e) {
-              if (e instanceof PrivateAIUnavailable) {
-                out.replaceChildren(
-                  h(
-                    'p',
-                    { class: 'err' },
-                    `On-device AI isn't available here (${e.state}). Your note was not sent anywhere.`,
-                  ),
-                  h('p', { class: 'muted' }, 'You can fill in the profile by hand instead:'),
-                );
-                showProfile(privateProfile.get() ?? emptyProfile());
-              } else out.replaceChildren(h('p', { class: 'err' }, (e as Error).message));
-            }
-          },
-        },
-        'Understand my note (on this device)',
-      ),
-      h(
-        'button',
-        {
-          onclick: () => {
-            privateNote.set('');
-            privateProfile.set(null);
-            refresh();
-          },
-        },
-        'Delete my note',
-      ),
-      out,
+      h('aside', {}, devicePanel(onCleanup)),
     ),
   );
   const saved = privateProfile.get();
-  if (saved) showProfile(saved);
+  if (saved) showProfile(saved, null);
+}
+
+/** Explains this browser's on-device AI status and offers the one-time model download. */
+function devicePanel(onCleanup: (fn: () => void) => void): HTMLElement {
+  const panel = h('div', { class: 'panel stack' });
+  const render = (s: DeviceState) => {
+    const progress = h('p', { class: 'small muted', 'aria-live': 'polite' });
+    const download = button('Download private AI', {
+      variant: 'primary',
+      icon: 'download',
+      onClick: () =>
+        void busy(download, 'Downloading…', () =>
+          enablePrivateAI((p) => (progress.textContent = `${Math.round(p * 100)}% downloaded`)),
+        ),
+    });
+    const body: Record<DeviceState, HTMLElement[]> = {
+      available: [
+        h('p', { class: 'small' }, 'This browser can read your note and check options without the internet.'),
+      ],
+      downloadable: [
+        h(
+          'p',
+          { class: 'small' },
+          'Chrome needs to download its on-device model once (a few GB). After that, private checks run offline.',
+        ),
+        download,
+        progress,
+      ],
+      downloading: [h('p', { class: 'small' }, 'Chrome is downloading its on-device model.'), progress],
+      unavailable: [
+        h(
+          'p',
+          { class: 'small' },
+          'This device doesn’t meet Chrome’s requirements for on-device AI. You can still vote by hand; nothing is sent to the cloud instead.',
+        ),
+      ],
+      'no-api': [
+        h(
+          'p',
+          { class: 'small' },
+          'This browser has no on-device AI. Use desktop Chrome for private checks, or vote by hand in each room.',
+        ),
+      ],
+    };
+    panel.replaceChildren(
+      h(
+        'div',
+        { class: 'cluster', style: '--cluster: var(--s-2)' },
+        icon(s === 'available' ? 'lock' : 'device'),
+        h('strong', {}, s === 'available' ? 'Private AI is ready' : 'Private AI on this device'),
+      ),
+      ...body[s],
+    );
+  };
+  render(deviceNow());
+  onCleanup(onDeviceState(render));
+  return panel;
 }

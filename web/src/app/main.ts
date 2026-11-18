@@ -1,8 +1,12 @@
-import '../style.css';
+import '@fontsource-variable/fraunces';
+import '@fontsource-variable/hanken-grotesk';
+import '../styles/app.css';
 import { ready } from '../data/firebase';
+import { button, notice, skeleton } from '../ui/components';
 import { h } from '../ui/dom';
-import { devicePill, refreshDeviceState } from './device-status';
-import { route, startRouter } from './router';
+import { icon } from '../ui/icons';
+import { deviceIndicator, refreshDeviceState } from './device-status';
+import { onNavigate, route, startRouter, type ScreenContext } from './router';
 import { homeScreen } from './screens/home';
 import { noteScreen } from './screens/note';
 import { privacyScreen } from './screens/privacy';
@@ -14,22 +18,58 @@ route('/app/note', noteScreen);
 route('/app/privacy', privacyScreen);
 route('/r/:roomId', roomScreen);
 
-const root = document.querySelector<HTMLDivElement>('#app')!;
-const main = h('main');
-root.append(
-  h(
-    'header',
-    {},
-    h('a', { href: '/app', class: 'logo' }, 'Veto'),
+const navLink = (href: string, iconName: 'pen' | 'eye', label: string) =>
+  h('a', { href, title: label }, icon(iconName), h('span', { class: 'nav-label' }, label));
+const nav = h(
+  'nav',
+  { class: 'app-nav', 'aria-label': 'Main' },
+  navLink('/app/note', 'pen', 'Your note'),
+  navLink('/app/privacy', 'eye', 'What left this device'),
+);
+onNavigate((path) =>
+  nav.querySelectorAll('a').forEach((a) => {
+    if (a.pathname === path) a.setAttribute('aria-current', 'page');
+    else a.removeAttribute('aria-current');
+  }),
+);
+
+const main = h('main', { class: 'app-main', id: 'main' });
+document
+  .querySelector('#app')!
+  .append(
     h(
-      'nav',
-      {},
-      h('a', { href: '/app/note' }, 'My private note'),
-      h('a', { href: '/app/privacy' }, 'What left my device'),
+      'header',
+      { class: 'app-header' },
+      h(
+        'div',
+        { class: 'app-header-inner' },
+        h('a', { href: '/app', class: 'wordmark' }, icon('mark', 'wordmark-mark'), 'Veto'),
+        nav,
+        deviceIndicator,
+      ),
     ),
-    devicePill,
+    main,
+  );
+
+function notFound({ root }: ScreenContext): void {
+  root.append(
+    h(
+      'div',
+      { class: 'state-screen' },
+      h('h1', {}, 'Nothing here'),
+      h('p', { class: 'muted' }, 'This page doesn’t exist. If someone sent you a link, check it with them.'),
+      h('a', { class: 'btn btn-primary', href: '/app' }, 'Go to Veto'),
+    ),
+  );
+}
+
+main.append(
+  h(
+    'div',
+    { class: 'state-screen', 'aria-busy': 'true' },
+    h('p', { class: 'muted' }, 'Connecting…'),
+    h('div', { style: 'width: 100%' }, skeleton(3)),
   ),
-  main,
 );
 
 void (async () => {
@@ -37,17 +77,27 @@ void (async () => {
   try {
     await ready();
   } catch (e) {
-    const code = (e as { code?: string }).code ?? (e as Error).message;
+    const code = (e as { code?: string }).code ?? 'unknown';
+    const offline = !navigator.onLine;
     main.replaceChildren(
       h(
         'div',
-        { class: 'card' },
-        h('h2', {}, "Can't connect"),
-        h('p', { class: 'err' }, `Couldn't sign in (${code}). Your private note is safe on this device.`),
-        h('button', { class: 'primary', onclick: () => location.reload() }, 'Try again'),
+        { class: 'state-screen' },
+        h('h1', {}, 'Can’t connect'),
+        notice(
+          'error',
+          offline ? 'You’re offline.' : 'Veto couldn’t sign you in.',
+          h(
+            'span',
+            {},
+            'Your private note is safe on this device. ',
+            offline ? 'Reconnect and try again.' : `Try again in a moment (${code}).`,
+          ),
+        ),
+        button('Try again', { variant: 'primary', icon: 'refresh', onClick: () => location.reload() }),
       ),
     );
     return;
   }
-  startRouter(main, homeScreen);
+  startRouter(main, notFound);
 })();

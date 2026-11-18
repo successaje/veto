@@ -21,6 +21,12 @@ const routes: Route[] = [];
 let cleanups: Cleanup[] = [];
 let outlet: HTMLElement | null = null;
 let notFound: Screen = () => {};
+const listeners = new Set<(path: string) => void>();
+
+/** Called after every navigation with the new path (e.g. to mark the current nav link). */
+export function onNavigate(fn: (path: string) => void): void {
+  listeners.add(fn);
+}
 
 /** Register a screen for a path such as `/r/:roomId`. */
 export function route(path: string, screen: Screen): void {
@@ -60,16 +66,21 @@ function render(): void {
   if (!outlet) return;
   cleanups.forEach((fn) => fn());
   cleanups = [];
-  outlet.replaceChildren();
   const path = currentPath();
+  // A fresh wrapper per navigation so the entrance animation runs on every screen change.
+  const screen = document.createElement('div');
+  screen.className = 'screen';
+  outlet.replaceChildren(screen);
+  listeners.forEach((fn) => fn(path));
+  const onCleanup = (fn: Cleanup) => void cleanups.push(fn);
   for (const r of routes) {
     const m = path.match(r.pattern);
     if (!m) continue;
     const params = Object.fromEntries(r.keys.map((k, i) => [k, m[i + 1]]));
-    void r.screen({ root: outlet, params, onCleanup: (fn) => cleanups.push(fn) });
+    void r.screen({ root: screen, params, onCleanup });
     return;
   }
-  void notFound({ root: outlet, params: {}, onCleanup: (fn) => cleanups.push(fn) });
+  void notFound({ root: screen, params: {}, onCleanup });
 }
 
 /** Re-render the current route, e.g. after deleting data the screen depends on. */

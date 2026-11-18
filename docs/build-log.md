@@ -19,10 +19,12 @@ Milestones in the order they landed. Dates are 2026. The plan this follows runs 
 | Nov 18 | Private profile editor with a plain-language read-back, replacing raw JSON                   |
 | Nov 18 | Fixed before first deploy: App Check debug token was inlined into production bundles         |
 | Nov 18 | Live on Hosting with App Check (reCAPTCHA Enterprise); full room verified on the live site   |
+| Nov 18 | Maps grounding probed (needs billing); source links per place; labelled demo fallback        |
 
 ## Open items
 
 - On-device call in a real Chrome profile (hardware check on the dev Mac is pending), then eval numbers.
-- Maps-grounded candidate search on the free tier (currently the demo list).
+- Switch on Maps grounding: billing, a budget alert and a TTL on stored results first
+  ([maps-grounding.md](maps-grounding.md)).
 - Enforce App Check for Firestore and AI Logic once real-browser traffic shows valid tokens.
 - Android and iOS clients (plan days 5 to 7).

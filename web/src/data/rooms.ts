@@ -37,7 +37,7 @@ export interface Member {
 
 export interface CandidateDoc {
   items: Candidate[];
-  source: 'maps' | 'fixture';
+  source: 'maps' | 'fixture' | 'fallback';
   attributions?: { title: string; uri: string }[];
 }
 

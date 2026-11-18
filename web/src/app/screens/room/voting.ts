@@ -3,7 +3,7 @@ import { myDecision, privateProfile } from '../../../data/notes';
 import { submitBallot } from '../../../data/rooms';
 import type { Candidate, PrivateProfile } from '../../../domain/attrs';
 import type { Choice } from '../../../domain/tally';
-import { optionItem, optionList } from '../../../ui/candidate';
+import { optionItem, optionList, placesNote } from '../../../ui/candidate';
 import { busy, button, notice, sourceTag, steps } from '../../../ui/components';
 import { h } from '../../../ui/dom';
 import { icon } from '../../../ui/icons';
@@ -32,19 +32,6 @@ export function voting(ctx: RoomCtx): HTMLElement {
     'div',
     { class: 'stack', style: '--stack: var(--s-6)' },
     profile ? decideWithProfile(ctx, profile, items) : decideByHand(ctx, items),
-    candidates?.attributions?.length
-      ? h(
-          'p',
-          { class: 'small muted' },
-          'Places from Google Maps: ',
-          ...candidates.attributions
-            .map((a, i) => [
-              i ? ', ' : '',
-              h('a', { href: a.uri, target: '_blank', rel: 'noopener' }, a.title),
-            ])
-            .flat(),
-        )
-      : null,
   );
 }
 
@@ -89,7 +76,7 @@ function decideWithProfile(ctx: RoomCtx, profile: PrivateProfile, items: Candida
       ),
       status,
     ),
-    list,
+    h('div', { class: 'stack', style: '--stack: var(--s-3)' }, list, placesNote(ctx.candidates?.source)),
   );
 
   const decide = button('Decide privately on this device', {
@@ -246,6 +233,7 @@ function decideByHand(ctx: RoomCtx, items: Candidate[]): HTMLElement {
         return optionItem(c, seg);
       }),
     ),
+    placesNote(ctx.candidates?.source),
     h(
       'div',
       { class: 'stack', style: '--stack: var(--s-3)' },

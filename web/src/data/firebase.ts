@@ -54,7 +54,11 @@ rc.defaultConfig = {
 export const cfg = {
   cloudModel: () => getValue(rc, 'cloud_model').asString(),
   cloudModelLite: () => getValue(rc, 'cloud_model_lite').asString(),
-  candidateSource: () => (getValue(rc, 'candidate_source').asString() === 'maps' ? 'maps' : 'fixture'),
+  candidateSource: (): 'maps' | 'fixture' =>
+    ((import.meta.env.DEV && import.meta.env.VITE_CANDIDATE_SOURCE) ||
+      getValue(rc, 'candidate_source').asString()) === 'maps'
+      ? 'maps'
+      : 'fixture',
   maxCandidates: () => Math.min(10, Math.max(2, getValue(rc, 'max_candidates').asNumber() || 10)),
   promptProfile: () => getValue(rc, 'prompt_profile').asString(),
   promptFit: () => getValue(rc, 'prompt_fit').asString(),

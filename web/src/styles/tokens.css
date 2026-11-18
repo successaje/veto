@@ -1,0 +1,109 @@
+/*
+ * Veto design tokens. Everything visual is derived from these; components never hard-code colors,
+ * sizes or durations. See docs/design.md for the reasoning.
+ */
+:root {
+  color-scheme: light dark;
+
+  /* Color: warm paper and ink, one vermilion accent for the veto mark. */
+  --paper: #f7f4ee;
+  --surface: #fffdf9;
+  --sunken: #efebe3;
+  --line: #e2dcd1;
+  --line-strong: #cbc2b3;
+  --ink: #1d1b18;
+  --ink-2: #4a453e;
+  --ink-3: #766f64;
+  --accent: #c8402a;
+  --accent-soft: #f6e2dc;
+  --good: #2e6a4f;
+  --good-soft: #e1eee6;
+  --cloud: #3d5a78;
+  --cloud-soft: #e3eaf2;
+  --warn: #8a5d0c;
+  --warn-soft: #f5ead3;
+  --danger: #b3261e;
+  --danger-soft: #f7e0dc;
+  --on-ink: #f7f4ee;
+
+  /* Type */
+  --font-display: 'Fraunces Variable', 'Iowan Old Style', Georgia, serif;
+  --font-ui: 'Hanken Grotesk Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.125rem;
+  --text-lg: 1.375rem;
+  --text-xl: 1.75rem;
+  --text-2xl: 2.25rem;
+  --text-3xl: clamp(2.5rem, 6vw, 3.75rem);
+  --leading-tight: 1.15;
+  --leading-snug: 1.35;
+  --leading-body: 1.55;
+
+  /* Space: 4px steps */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.25rem;
+  --s-6: 1.5rem;
+  --s-8: 2rem;
+  --s-10: 2.5rem;
+  --s-12: 3rem;
+  --s-16: 4rem;
+  --s-20: 5rem;
+
+  /* Shape: small radii; full rounding only for status pills */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-full: 999px;
+  --shadow-1: 0 1px 2px rgb(29 27 24 / 0.06), 0 1px 1px rgb(29 27 24 / 0.04);
+  --shadow-2: 0 8px 24px rgb(29 27 24 / 0.12), 0 2px 6px rgb(29 27 24 / 0.08);
+
+  /* Motion: quick, decelerating; disabled entirely for reduced-motion users (base.css) */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+
+  /* Layout */
+  --page: 40rem;
+  --page-wide: 72rem;
+  --gutter: var(--s-4);
+  --tap: 2.75rem;
+}
+
+@media (min-width: 40rem) {
+  :root {
+    --gutter: var(--s-6);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #141311;
+    --surface: #1c1a17;
+    --sunken: #24221e;
+    --line: #2f2c27;
+    --line-strong: #46413a;
+    --ink: #f1ece3;
+    --ink-2: #c9c2b6;
+    --ink-3: #978f82;
+    --accent: #e8664d;
+    --accent-soft: #3a211b;
+    --good: #82c6a2;
+    --good-soft: #1d2c24;
+    --cloud: #93b3d4;
+    --cloud-soft: #1d2631;
+    --warn: #e2b660;
+    --warn-soft: #2e2615;
+    --danger: #f08a80;
+    --danger-soft: #3a1e1b;
+    --on-ink: #141311;
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-2: 0 12px 32px rgb(0 0 0 / 0.5), 0 2px 6px rgb(0 0 0 / 0.4);
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "name": "veto",
+  "private": true,
+  "description": "Repo-level tooling for Veto. The app lives in web/, security rules and their tests in firebase/.",
+  "engines": {
+    "node": ">=24.12"
+  },
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check": "npm run format:check && npm --prefix web run typecheck && npm --prefix web test && npm --prefix web run build"
+  },
+  "devDependencies": {
+    "prettier": "3.10.1"
+  }
+}

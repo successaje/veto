@@ -29,7 +29,10 @@ export async function parseRoomSpec(message: string): Promise<{ spec: RoomSpec; 
   record({
     kind: source === 'on_device' ? 'device-ai' : 'cloud-ai',
     feature: 'Room helper',
-    detail: source === 'on_device' ? 'Ran on this device.' : `Sent your public plan (${words(message)} words) to Gemini.`,
+    detail:
+      source === 'on_device'
+        ? 'Ran on this device.'
+        : `Sent your public plan (${words(message)} words) to Gemini.`,
   });
   const o = parseJson(r.response.text()) as Partial<RoomSpec>;
   return {
@@ -56,7 +59,11 @@ export interface FoundCandidates {
 export async function findCandidates(spec: RoomSpec): Promise<FoundCandidates> {
   const max = cfg.maxCandidates();
   if (cfg.candidateSource() === 'fixture') {
-    record({ kind: 'local', feature: 'Find options', detail: 'Used the built-in demo list. Nothing sent to AI.' });
+    record({
+      kind: 'local',
+      feature: 'Find options',
+      detail: 'Used the built-in demo list. Nothing sent to AI.',
+    });
     return { items: (fixture.items as Candidate[]).slice(0, max), source: 'fixture', attributions: [] };
   }
 
@@ -79,7 +86,9 @@ export async function findCandidates(spec: RoomSpec): Promise<FoundCandidates> {
     .map((m) => ({ title: m.title ?? 'Google Maps', uri: m.uri!, placeId: m.placeId }));
 
   // Step 2: normalise into the shared vocabulary.
-  const normalised = await cloudOnly({ system: NORMALIZE_SYSTEM, schema: candidatesSchema }).generateContent(found);
+  const normalised = await cloudOnly({ system: NORMALIZE_SYSTEM, schema: candidatesSchema }).generateContent(
+    found,
+  );
   const items = sanitizeCandidates(parseJson(normalised.response.text()), max).map((c) => {
     const hit = attributions.find((a) => a.title.toLowerCase() === c.name.toLowerCase());
     return hit ? { ...c, placeId: hit.placeId, mapsUri: hit.uri } : c;
@@ -100,7 +109,11 @@ export async function understandNote(note: string): Promise<PrivateProfile> {
   const system = cfg.promptProfile() || PROFILE_SYSTEM;
   const r = await onDeviceOnly(system, profileSchema).generateContent(note);
   assertRanOnDevice(r.response.inferenceSource, 'Understand my note');
-  record({ kind: 'device-ai', feature: 'Understand my note', detail: 'Ran on this device. Your note was not sent anywhere.' });
+  record({
+    kind: 'device-ai',
+    feature: 'Understand my note',
+    detail: 'Ran on this device. Your note was not sent anywhere.',
+  });
   return sanitizeProfile(parseJson(r.response.text()));
 }
 
@@ -111,7 +124,10 @@ export interface PrivateDecision {
   details: Record<number, HardResult & { score?: number }>;
 }
 
-export async function decidePrivately(profile: PrivateProfile, candidates: Candidate[]): Promise<PrivateDecision> {
+export async function decidePrivately(
+  profile: PrivateProfile,
+  candidates: Candidate[],
+): Promise<PrivateDecision> {
   const details: PrivateDecision['details'] = {};
   for (const c of candidates) details[c.i] = hardCheck(profile, c);
   const open = candidates.filter((c) => !details[c.i].veto);
@@ -127,12 +143,17 @@ export async function decidePrivately(profile: PrivateProfile, candidates: Candi
       `Dislikes: ${profile.soft.dislikes.join('; ') || 'none'}`,
       `Also: ${profile.other || 'nothing'}`,
       'Places:',
-      ...open.map((c) => `${c.i}. ${c.name} (${c.area}), price band ${c.priceBand}, noise ${c.noise}. ${c.evidence}`),
+      ...open.map(
+        (c) => `${c.i}. ${c.name} (${c.area}), price band ${c.priceBand}, noise ${c.noise}. ${c.evidence}`,
+      ),
     ].join('\n');
     const system = cfg.promptFit() || FIT_SYSTEM;
     const r = await onDeviceOnly(system, fitSchema).generateContent(prompt);
     assertRanOnDevice(r.response.inferenceSource, 'Private fit check');
-    scores = sanitizeScores(parseJson(r.response.text()), open.map((c) => c.i));
+    scores = sanitizeScores(
+      parseJson(r.response.text()),
+      open.map((c) => c.i),
+    );
   }
   record({
     kind: 'device-ai',
@@ -156,7 +177,10 @@ export async function explainWinner(c: Candidate, spec: RoomSpec): Promise<{ tex
   record({
     kind: source === 'on_device' ? 'device-ai' : 'cloud-ai',
     feature: 'Explain the pick',
-    detail: source === 'on_device' ? 'Ran on this device.' : `Sent public facts about ${c.name} (${words(facts)} words) to Gemini.`,
+    detail:
+      source === 'on_device'
+        ? 'Ran on this device.'
+        : `Sent public facts about ${c.name} (${words(facts)} words) to Gemini.`,
   });
   return { text: r.response.text().trim(), source };
 }

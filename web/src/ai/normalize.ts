@@ -14,15 +14,24 @@ function pick<T extends string>(v: unknown, allowed: readonly T[], fallback: T):
 }
 function pickMany(v: unknown, allowed: readonly string[], max = 8): string[] {
   if (!Array.isArray(v)) return [];
-  return [...new Set(v.filter((x): x is string => typeof x === 'string' && allowed.includes(x)))].slice(0, max);
+  return [...new Set(v.filter((x): x is string => typeof x === 'string' && allowed.includes(x)))].slice(
+    0,
+    max,
+  );
 }
 function strings(v: unknown, maxItems = 5, maxLen = 60): string[] {
   if (!Array.isArray(v)) return [];
-  return v.map((x) => asStr(x, maxLen)).filter(Boolean).slice(0, maxItems);
+  return v
+    .map((x) => asStr(x, maxLen))
+    .filter(Boolean)
+    .slice(0, maxItems);
 }
 
 export function parseJson(text: string): unknown {
-  const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+  const cleaned = text
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```\s*$/, '')
+    .trim();
   return JSON.parse(cleaned);
 }
 

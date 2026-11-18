@@ -141,7 +141,12 @@ describe('starting a vote', () => {
 describe('voting', () => {
   it('accepts one ballot per member', async () => {
     await roomInVoting();
-    await assertSucceeds(vote('bob', [{ i: 0, veto: true }, { i: 1, veto: false, score: 2 }]));
+    await assertSucceeds(
+      vote('bob', [
+        { i: 0, veto: true },
+        { i: 1, veto: false, score: 2 },
+      ]),
+    );
     await assertFails(vote('bob', [{ i: 2, veto: false, score: 3 }]));
   });
 
@@ -183,11 +188,29 @@ describe('voting', () => {
 describe('results', () => {
   it('keeps the tally hidden from everyone, host included, until all have voted', async () => {
     await roomInVoting();
-    await assertSucceeds(vote('alice', [{ i: 0, veto: true }, { i: 1, veto: false, score: 1 }, { i: 2, veto: false, score: 3 }]));
+    await assertSucceeds(
+      vote('alice', [
+        { i: 0, veto: true },
+        { i: 1, veto: false, score: 1 },
+        { i: 2, veto: false, score: 3 },
+      ]),
+    );
     await assertFails(getDoc(doc(db('alice'), 'rooms', RID, 'tally', 'main')));
-    await assertSucceeds(vote('bob', [{ i: 0, veto: false, score: 3 }, { i: 1, veto: false, score: 2 }, { i: 2, veto: false, score: 2 }]));
+    await assertSucceeds(
+      vote('bob', [
+        { i: 0, veto: false, score: 3 },
+        { i: 1, veto: false, score: 2 },
+        { i: 2, veto: false, score: 2 },
+      ]),
+    );
     await assertFails(reveal('bob'));
-    await assertSucceeds(vote('carol', [{ i: 0, veto: false, score: 3 }, { i: 1, veto: true }, { i: 2, veto: false, score: 1 }]));
+    await assertSucceeds(
+      vote('carol', [
+        { i: 0, veto: false, score: 3 },
+        { i: 1, veto: true },
+        { i: 2, veto: false, score: 1 },
+      ]),
+    );
     await assertFails(reveal('mallory'));
     await assertSucceeds(reveal('carol'));
 

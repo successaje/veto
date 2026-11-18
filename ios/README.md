@@ -6,6 +6,7 @@ results. Hosting stays on web/Android. Needs an iPhone with Apple Intelligence (
 ## Pick an SDK path on day 7 (spike both if needed)
 
 **Path A (try first): firebase-ios-sdk 12.19.3, pinned.**
+
 - firebase-ios-sdk 13.0.0 (Oct 7, 2026) removed `HybridModel` and `FirebaseAI.SystemLanguageModel`.
   Pin 12.19.x to keep them.
 - Use a session on the on-device model only (Apple Foundation Models through Firebase). This is clearly
@@ -16,6 +17,7 @@ results. Hosting stays on web/Android. Needs an iPhone with Apple Intelligence (
   "coming soon", so confirm it works in the spike.
 
 **Path B: firebase-ios-sdk 13.x + iOS 27 / Xcode 27.**
+
 - Private calls use Apple's `LanguageModelSession(model: SystemLanguageModel.default)` with `@Generable`.
 - Firebase's `geminiLanguageModel(name:)` provides Gemini inside the same API if iOS ever needs the cloud.
 - Routing is manual on this path.

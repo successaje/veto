@@ -45,7 +45,11 @@ export async function assertDeviceReady(): Promise<void> {
 /** Defence in depth: refuse to use an answer that did not come from this device. */
 export function assertRanOnDevice(source: string | undefined, feature: string): void {
   if (source !== 'on_device') {
-    record({ kind: 'blocked', feature, detail: `Expected on-device inference, got "${source}". Result discarded.` });
+    record({
+      kind: 'blocked',
+      feature,
+      detail: `Expected on-device inference, got "${source}". Result discarded.`,
+    });
     throw new Error(`${feature}: expected on-device inference, got ${source}`);
   }
 }
@@ -54,6 +58,9 @@ export function assertRanOnDevice(source: string | undefined, feature: string): 
  * Starts the one-time model download. Chrome requires this to happen on or after a user
  * gesture, so call it from a click handler. Progress is 0..1.
  */
-export async function downloadPrivateModel(model: GenerativeModel, onProgress: (p: number) => void): Promise<void> {
+export async function downloadPrivateModel(
+  model: GenerativeModel,
+  onProgress: (p: number) => void,
+): Promise<void> {
   await model.initializeDeviceModel(onProgress);
 }

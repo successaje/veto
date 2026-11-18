@@ -35,7 +35,10 @@ describe('matcher (gold profiles → hard vetoes)', () => {
 
 describe('tally', () => {
   it('turns ballots into bounded increments', () => {
-    const inc = ballotIncrements([{ i: 0, veto: true }, { i: 3, veto: false, score: 2 }]);
+    const inc = ballotIncrements([
+      { i: 0, veto: true },
+      { i: 3, veto: false, score: 2 },
+    ]);
     expect(inc.v0).toBe(1);
     expect(inc.s0).toBe(0);
     expect(inc.s3).toBe(2);
@@ -44,7 +47,12 @@ describe('tally', () => {
   });
 
   it('rejects duplicate or out-of-range slots', () => {
-    expect(() => ballotIncrements([{ i: 1, veto: true }, { i: 1, veto: true }])).toThrow();
+    expect(() =>
+      ballotIncrements([
+        { i: 1, veto: true },
+        { i: 1, veto: true },
+      ]),
+    ).toThrow();
     expect(() => ballotIncrements([{ i: 10, veto: true }])).toThrow();
   });
 

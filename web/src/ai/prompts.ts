@@ -2,6 +2,7 @@
 // (prompt_profile, prompt_fit) without shipping a new build.
 
 import { ATTRS } from '../domain/attrs';
+import type { Example } from './models';
 
 export const SPEC_SYSTEM = `You turn a host's message about a group outing into public room details.
 Only use what the message says. If something is missing, write a short sensible placeholder
@@ -21,6 +22,8 @@ Keep "evidence" factual, at most 40 words, and only from the text you were given
 
 export const PROFILE_SYSTEM = `You read one person's private note about going out and fill in a JSON profile.
 The note never leaves this device; be accurate, and never invent constraints that are not in the note.
+Most notes mention one or two things. Every field the note does not clearly state keeps its default:
+[] for lists, false, -1, "confirm", "". Never copy values from the examples.
 - avoidFoods: foods they must not eat, from: ${ATTRS.foods.join(', ')}. Pregnancy means raw_fish and soft_cheese.
 - avoidVenueTypes: from ${ATTRS.venueTypes.join(', ')}. Avoiding bars means bar_centric.
 - needsStepFree: true if they use a wheelchair or need step-free access.
@@ -29,9 +32,43 @@ The note never leaves this device; be accurate, and never invent constraints tha
 - avoidAlcoholFocus: true if places where drinking is the main thing are a problem (for example sobriety).
 - needsQuiet: true if loud places are a problem.
 - requireDietTags: must-haves from ${ATTRS.dietTags.join(', ')}. Coeliac means gluten_free_options.
-- avoidNames: names of specific places they will not go to.
+- avoidNames: names of specific places they will not go to, copied exactly as written.
 - soft.likes / soft.dislikes: short phrases for preferences that are not must-haves.
 - other: anything else that matters, in at most 15 words, or "".`;
+
+/**
+ * Worked examples for the profile prompt. Without them Gemini Nano fills in nearly every field
+ * (step-free, quiet, no bars) whatever the note says. None of them is an eval case.
+ */
+export const PROFILE_EXAMPLES: Example[] = (() => {
+  const answer = (hard: Record<string, unknown>, likes: string[] = []) =>
+    JSON.stringify({
+      hard: {
+        avoidFoods: [],
+        avoidVenueTypes: [],
+        needsStepFree: false,
+        stepFreeUnknown: 'confirm',
+        maxPerPerson: -1,
+        maxTravelMin: -1,
+        avoidAlcoholFocus: false,
+        needsQuiet: false,
+        requireDietTags: [],
+        avoidNames: [],
+        ...hard,
+      },
+      soft: { likes, dislikes: [] },
+      other: '',
+    });
+  return [
+    { input: "I'm allergic to peanuts. Anything else is fine.", output: answer({ avoidFoods: ['peanuts'] }) },
+    { input: 'Keep it under $35 please.', output: answer({ maxPerPerson: 35 }) },
+    {
+      input: "I have to be home early, so nowhere more than 25 minutes away. And not Luigi's, long story.",
+      output: answer({ maxTravelMin: 25, avoidNames: ["Luigi's"] }),
+    },
+    { input: 'Honestly anything works for me. I love Thai food.', output: answer({}, ['Thai food']) },
+  ];
+})();
 
 export const FIT_SYSTEM = `You score how well each place suits one person's soft preferences, from 0 (poor) to 3 (great).
 Hard requirements were already checked; do not rule anything out. Return every listed index exactly once.`;

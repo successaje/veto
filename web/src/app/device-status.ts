@@ -23,7 +23,12 @@ deviceIndicator.append(indicatorLabel);
 let current: DeviceState = 'no-api';
 const listeners = new Set<(s: DeviceState) => void>();
 
+/** Download progress (0–1) while this page is downloading the model, otherwise null. */
+let progress: number | null = null;
+const progressListeners = new Set<(p: number | null) => void>();
+
 export const deviceNow = (): DeviceState => current;
+export const downloadProgress = (): number | null => progress;
 
 /** Subscribe to on-device AI state changes. Returns an unsubscribe function. */
 export function onDeviceState(fn: (s: DeviceState) => void): () => void {
@@ -31,20 +36,42 @@ export function onDeviceState(fn: (s: DeviceState) => void): () => void {
   return () => listeners.delete(fn);
 }
 
+/** Subscribe to download progress. Separate from state so a progress tick doesn't re-render screens. */
+export function onDownloadProgress(fn: (p: number | null) => void): () => void {
+  progressListeners.add(fn);
+  return () => progressListeners.delete(fn);
+}
+
+function show(s: DeviceState): void {
+  current = s;
+  deviceIndicator.dataset.state = s;
+  deviceIndicator.title = LABEL[s];
+  indicatorLabel.textContent = LABEL[s];
+  listeners.forEach((fn) => fn(s));
+}
+
+function setProgress(p: number | null): void {
+  progress = p;
+  progressListeners.forEach((fn) => fn(p));
+}
+
 export async function refreshDeviceState(): Promise<DeviceState> {
-  current = await deviceState();
-  deviceIndicator.dataset.state = current;
-  deviceIndicator.title = LABEL[current];
-  indicatorLabel.textContent = LABEL[current];
-  listeners.forEach((fn) => fn(current));
+  show(await deviceState());
   return current;
 }
 
 /**
  * Download Chrome's on-device model. Must run from a click: Chrome only starts the download
- * after a user gesture. `onProgress` receives 0–1.
+ * after a user gesture. The header and the note screen follow along through the listeners.
  */
-export async function enablePrivateAI(onProgress: (fraction: number) => void): Promise<DeviceState> {
-  await downloadPrivateModel(onDeviceOnly(PROFILE_SYSTEM), onProgress);
-  return refreshDeviceState();
+export async function enablePrivateAI(): Promise<DeviceState> {
+  setProgress(0);
+  show('downloading');
+  try {
+    await downloadPrivateModel(onDeviceOnly(PROFILE_SYSTEM), setProgress);
+  } finally {
+    setProgress(null);
+    await refreshDeviceState();
+  }
+  return current;
 }

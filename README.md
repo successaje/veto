@@ -86,11 +86,31 @@ See [docs/threat-model.md](docs/threat-model.md) for what this does and does not
 
 | Platform         | Model                   | Cases | Exact veto sets | Hard-constraint recall | Precision | p50 latency |
 | ---------------- | ----------------------- | ----- | --------------- | ---------------------- | --------- | ----------- |
-| Chrome (desktop) | Gemini Nano             | 9     | _todo_          | _todo_                 | _todo_    | _todo_      |
+| Chrome (desktop) | Gemini Nano             | 9     | 7–8 of 9        | 0.942                  | 0.94–1.00 | 4.0–4.9 s   |
 | Android          | Gemini Nano (STABLE)    | 9     | _todo_          | _todo_                 | _todo_    | _todo_      |
 | iOS              | Apple Foundation Models | 9     | _todo_          | _todo_                 | _todo_    | _todo_      |
 
 Run the web eval at `/eval.html`. The dataset is in [`eval/`](eval/): synthetic people only.
+
+Chrome numbers are from three runs on a MacBook Air (M3, 8 GB) in Chrome 157. The model samples, so
+runs differ. What we learned getting there:
+
+- **Without examples, Gemini Nano fills in nearly every field.** The first prompt gave recall 1.000
+  but precision 0.693 and only 2 of 9 exact sets: it added step-free, quiet and no-bars rules to
+  notes that never mentioned them, and once turned "I love spicy food" into "avoid spicy". In a
+  group, those extra vetoes add up until nothing is left.
+- **Four worked examples, mostly empty, fixed most of it.** Code then drops any limit or place
+  name the note doesn't contain, so a number copied from an example or an invented place can't
+  veto anything.
+- **One known miss:** "Eight months sober. I'm fine with restaurants that serve drinks…" comes back
+  empty, so the sober rule is lost (recall 0.942). The note screen's read-back says nothing will
+  be ruled out, so the person can tick it themselves. An extra example fixed this case but made
+  the others worse.
+- The prompt was tuned on these same nine notes. The set needs to grow, with notes held back from
+  tuning, before these numbers mean much.
+- First run on this machine: the model is about 4 GB, took about 25 minutes to download, and needs
+  22 GB free to start. One note hung under memory pressure, so every on-device call now has a
+  30-second deadline.
 
 ## Architecture
 
@@ -202,7 +222,7 @@ servers. With Homebrew's Java (keg-only), put it on the PATH first:
 - [x] Design system and landing page
 - [x] Live Firebase project: cloud AI call and a full room verified end to end
 - [x] On-device eval page
-- [ ] On-device run on real hardware: structured output and eval numbers
+- [x] On-device run on real hardware (Chrome, M3 8 GB): structured output and eval numbers
 - [x] Maps grounding wired up: a source link for every place, labelled demo fallback
 - [ ] Maps grounding switched on (needs billing; no grounding quota on an unbilled project)
 - [ ] Android client

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { parseJson, sanitizeCandidates, sanitizeProfile, sanitizeScores } from './normalize';
+import { emptyProfile, type PrivateProfile } from '../domain/attrs';
+import { groundProfile, parseJson, sanitizeCandidates, sanitizeProfile, sanitizeScores } from './normalize';
 
 describe('sanitizeProfile', () => {
   it('drops values outside the vocabulary and maps -1 to "no limit"', () => {
@@ -72,5 +73,37 @@ describe('sanitizeScores', () => {
 describe('parseJson', () => {
   it('strips markdown fences', () => {
     expect(parseJson('```json\n{"a":1}\n```')).toEqual({ a: 1 });
+  });
+});
+
+describe('groundProfile', () => {
+  const withHard = (hard: Partial<PrivateProfile['hard']>): PrivateProfile => {
+    const p = emptyProfile();
+    return { ...p, hard: { ...p.hard, ...hard } };
+  };
+
+  it('keeps limits the note states and drops numbers it never mentions', () => {
+    const p = groundProfile(withHard({ maxPerPerson: 20, maxTravelMin: 25 }), 'I can do about $20 a head.');
+    expect(p.hard.maxPerPerson).toBe(20);
+    expect(p.hard.maxTravelMin).toBeNull();
+  });
+
+  it('does not match a number inside a longer one', () => {
+    expect(
+      groundProfile(withHard({ maxPerPerson: 15 }), 'Payday is the 150th day').hard.maxPerPerson,
+    ).toBeNull();
+  });
+
+  it('trusts numbers when the note spells them out', () => {
+    const p = groundProfile(withHard({ maxTravelMin: 30 }), 'Nothing more than half an hour away.');
+    expect(p.hard.maxTravelMin).toBe(30);
+  });
+
+  it('keeps only place names the note contains, ignoring case and a leading "The"', () => {
+    const p = groundProfile(
+      withHard({ avoidNames: ['The Tap Room', 'The Rusty Mug', "Luigi's"] }),
+      'My ex works at the tap room, so not there.',
+    );
+    expect(p.hard.avoidNames).toEqual(['The Tap Room']);
   });
 });

@@ -6,15 +6,16 @@ import { record, words } from '../data/ledger';
 import { hardCheck, type HardResult } from '../domain/matcher';
 import type { Choice } from '../domain/tally';
 import fixture from '../../../eval/candidates.sample.json';
-import { assertDeviceReady, assertRanOnDevice, deviceState } from './gate';
+import { assertDeviceReady, assertRanOnDevice, deviceState, withDeadline } from './gate';
 import { attachSources, mapsSources } from './maps';
 import { cloudOnly, onDeviceOnly, preferDevice } from './models';
-import { parseJson, sanitizeCandidates, sanitizeProfile, sanitizeScores } from './normalize';
+import { groundProfile, parseJson, sanitizeCandidates, sanitizeProfile, sanitizeScores } from './normalize';
 import {
   CANDIDATE_SEARCH_SYSTEM,
   EXPLAIN_SYSTEM,
   FIT_SYSTEM,
   NORMALIZE_SYSTEM,
+  PROFILE_EXAMPLES,
   PROFILE_SYSTEM,
   SPEC_SYSTEM,
 } from './prompts';
@@ -136,19 +137,24 @@ async function fromMaps(spec: RoomSpec, max: number): Promise<FoundCandidates> {
   };
 }
 
+/** On-device answers normally take 4 to 8 s on an 8 GB Mac; past this, something is stuck. */
+const DEVICE_DEADLINE_MS = 30_000;
+
 // 3. Understand my note (ONLY_ON_DEVICE, private) ----------------------------------------------
 
 export async function understandNote(note: string): Promise<PrivateProfile> {
   await assertDeviceReady();
   const system = cfg.promptProfile() || PROFILE_SYSTEM;
-  const r = await onDeviceOnly(system, profileSchema).generateContent(note);
+  const r = await withDeadline(DEVICE_DEADLINE_MS, (signal) =>
+    onDeviceOnly(system, profileSchema, { examples: PROFILE_EXAMPLES, signal }).generateContent(note),
+  );
   assertRanOnDevice(r.response.inferenceSource, 'Understand my note');
   record({
     kind: 'device-ai',
     feature: 'Understand my note',
     detail: 'Ran on this device. Your note was not sent anywhere.',
   });
-  return sanitizeProfile(parseJson(r.response.text()));
+  return groundProfile(sanitizeProfile(parseJson(r.response.text())), note);
 }
 
 // 4. Private fit check (code for hard rules + ONLY_ON_DEVICE for soft fit) --------------------
@@ -182,7 +188,9 @@ export async function decidePrivately(
       ),
     ].join('\n');
     const system = cfg.promptFit() || FIT_SYSTEM;
-    const r = await onDeviceOnly(system, fitSchema).generateContent(prompt);
+    const r = await withDeadline(DEVICE_DEADLINE_MS, (signal) =>
+      onDeviceOnly(system, fitSchema, { signal }).generateContent(prompt),
+    );
     assertRanOnDevice(r.response.inferenceSource, 'Private fit check');
     scores = sanitizeScores(
       parseJson(r.response.text()),

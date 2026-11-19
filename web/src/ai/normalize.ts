@@ -58,6 +58,34 @@ export function sanitizeProfile(raw: unknown): PrivateProfile {
   };
 }
 
+// Numbers spelled out ("twenty dollars", "half an hour") can't be checked against the digits.
+const NUMBER_WORDS =
+  /\b(ten|fifteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|half|quarter|hour|hours)\b/;
+
+/**
+ * Keep a limit or a place name only if the note actually says it. Small models copy numbers from
+ * the prompt's examples and invent place names; neither may veto a real option.
+ */
+export function groundProfile(p: PrivateProfile, note: string): PrivateProfile {
+  const text = note.toLowerCase();
+  const said = (n: number | null) =>
+    n != null && (new RegExp(`(^|[^0-9])${n}([^0-9]|$)`).test(text) || NUMBER_WORDS.test(text));
+  const key = (name: string) =>
+    name
+      .toLowerCase()
+      .replace(/^the\s+/, '')
+      .trim();
+  return {
+    ...p,
+    hard: {
+      ...p.hard,
+      maxPerPerson: said(p.hard.maxPerPerson) ? p.hard.maxPerPerson : null,
+      maxTravelMin: said(p.hard.maxTravelMin) ? p.hard.maxTravelMin : null,
+      avoidNames: p.hard.avoidNames.filter((n) => key(n) && text.includes(key(n))),
+    },
+  };
+}
+
 export function sanitizeCandidates(raw: unknown, max: number): Candidate[] {
   const items = Array.isArray(asObj(raw).items) ? (asObj(raw).items as unknown[]) : [];
   return items

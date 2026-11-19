@@ -6,7 +6,14 @@ import { emptyProfile, type PrivateProfile } from '../../domain/attrs';
 import { busy, button, field, notice, pageHead, toast } from '../../ui/components';
 import { h } from '../../ui/dom';
 import { icon } from '../../ui/icons';
-import { deviceNow, enablePrivateAI, onDeviceState } from '../device-status';
+import {
+  deviceNow,
+  downloadProgress,
+  enablePrivateAI,
+  onDeviceState,
+  onDownloadProgress,
+} from '../device-status';
+import { reportError } from '../report';
 import { refresh, type ScreenContext } from '../router';
 import { profileEditor } from './profile-editor';
 
@@ -99,15 +106,23 @@ export function noteScreen({ root, onCleanup }: ScreenContext): void {
 /** Explains this browser's on-device AI status and offers the one-time model download. */
 function devicePanel(onCleanup: (fn: () => void) => void): HTMLElement {
   const panel = h('div', { class: 'panel stack' });
+  // One progress line for the whole download, kept across re-renders of the panel.
+  const progress = h('p', { class: 'small muted', 'aria-live': 'polite' });
+  const showProgress = (p: number | null) => {
+    progress.textContent = p == null ? '' : `${Math.round(p * 100)}% downloaded`;
+  };
+  showProgress(downloadProgress());
+  onCleanup(onDownloadProgress(showProgress));
+
   const render = (s: DeviceState) => {
-    const progress = h('p', { class: 'small muted', 'aria-live': 'polite' });
     const download = button('Download private AI', {
       variant: 'primary',
       icon: 'download',
       onClick: () =>
-        void busy(download, 'Downloading…', () =>
-          enablePrivateAI((p) => (progress.textContent = `${Math.round(p * 100)}% downloaded`)),
-        ),
+        void enablePrivateAI().catch((e) => {
+          reportError(e);
+          toast('The download didn’t finish. Check your free disk space and try again.', 'alert');
+        }),
     });
     const body: Record<DeviceState, HTMLElement[]> = {
       available: [
@@ -120,9 +135,15 @@ function devicePanel(onCleanup: (fn: () => void) => void): HTMLElement {
           'Chrome needs to download its on-device model once (a few GB). After that, private checks run offline.',
         ),
         download,
+      ],
+      downloading: [
+        h(
+          'p',
+          { class: 'small' },
+          'Chrome is downloading its on-device model. It keeps going if you leave this page.',
+        ),
         progress,
       ],
-      downloading: [h('p', { class: 'small' }, 'Chrome is downloading its on-device model.'), progress],
       unavailable: [
         h(
           'p',

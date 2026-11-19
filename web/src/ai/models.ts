@@ -24,19 +24,47 @@ function systemPrompt(text: string) {
   return [{ role: 'system' as const, content: [{ type: 'text' as const, value: text }] }];
 }
 
+/** A worked example for an on-device prompt: a note and the exact answer we want for it. */
+export interface Example {
+  input: string;
+  output: string;
+}
+
+const text = (value: string) => [{ type: 'text' as const, value }];
+const examplePrompts = (examples: Example[]) =>
+  examples.flatMap((e) => [
+    { role: 'user' as const, content: text(e.input) },
+    { role: 'assistant' as const, content: text(e.output) },
+  ]);
+
 function jsonConfig(schema?: object) {
   return schema
     ? { responseMimeType: 'application/json', responseJsonSchema: schema as Record<string, unknown> }
     : undefined;
 }
 
-/** Private features. No inCloudParams on purpose; always call assertDeviceReady() first. */
-export function onDeviceOnly(system: string, schema?: object): GenerativeModel {
+/**
+ * Private features. No inCloudParams on purpose; always call assertDeviceReady() first.
+ * `signal` stops a prompt that runs too long: the SDK hands promptOptions to Chrome's prompt()
+ * unchanged, though its type doesn't list `signal`.
+ */
+export function onDeviceOnly(
+  system: string,
+  schema?: object,
+  opts: { examples?: Example[]; signal?: AbortSignal } = {},
+): GenerativeModel {
+  const promptOptions = {
+    ...(schema ? { responseConstraint: schema } : {}),
+    ...(opts.signal ? { signal: opts.signal } : {}),
+  };
   return getGenerativeModel(ai, {
     mode: InferenceMode.ONLY_ON_DEVICE,
     onDeviceParams: {
-      createOptions: { ...TEXT_ONLY, initialPrompts: systemPrompt(system) },
-      promptOptions: schema ? { responseConstraint: schema } : undefined,
+      createOptions: {
+        ...TEXT_ONLY,
+        initialPrompts: [...systemPrompt(system), ...examplePrompts(opts.examples ?? [])],
+      },
+      promptOptions: Object.keys(promptOptions).length ? promptOptions : undefined,
     },
   });
 }

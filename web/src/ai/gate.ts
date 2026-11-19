@@ -37,6 +37,33 @@ export class PrivateAIUnavailable extends Error {
   }
 }
 
+/** The on-device model didn't answer in time (seen on an 8 GB Mac under memory pressure). */
+export class PrivateAITimeout extends Error {
+  constructor(readonly ms: number) {
+    super(`On-device AI took longer than ${ms / 1000} s.`);
+  }
+}
+
+/**
+ * Run an on-device call with a deadline. The signal stops the prompt in Chrome; the race makes
+ * sure the caller hears back even if a prompt ignores it.
+ */
+export async function withDeadline<T>(ms: number, run: (signal: AbortSignal) => Promise<T>): Promise<T> {
+  const ctl = new AbortController();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const late = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      ctl.abort();
+      reject(new PrivateAITimeout(ms));
+    }, ms);
+  });
+  try {
+    return await Promise.race([run(ctl.signal), late]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function assertDeviceReady(): Promise<void> {
   const s = await deviceState();
   if (s !== 'available') throw new PrivateAIUnavailable(s);

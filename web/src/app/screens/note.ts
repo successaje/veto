@@ -1,6 +1,6 @@
 import type { DeviceState } from '../../ai/gate';
 import { understandNote } from '../../ai/features';
-import { PrivateAIUnavailable } from '../../ai/gate';
+import { PrivateAITimeout, PrivateAIUnavailable } from '../../ai/gate';
 import { privateNote, privateProfile } from '../../data/notes';
 import { emptyProfile, type PrivateProfile } from '../../domain/attrs';
 import { busy, button, field, notice, pageHead, toast } from '../../ui/components';
@@ -54,10 +54,22 @@ export function noteScreen({ root, onCleanup }: ScreenContext): void {
                 'Your note was not sent anywhere. Fill in your limits by hand below, or vote by hand in each room.',
               ),
             );
-          } else
+          } else if (e instanceof PrivateAITimeout) {
+            reportError(e);
+            showProfile(privateProfile.get() ?? emptyProfile(), null);
+            out.prepend(
+              notice(
+                'warn',
+                'Your device took too long.',
+                'This can happen when the computer is short on memory. Nothing was sent anywhere. Try again, or fill in your limits by hand below.',
+              ),
+            );
+          } else {
+            reportError(e);
             out.replaceChildren(
               notice('error', 'Reading your note failed.', 'Nothing was sent anywhere. Try again.'),
             );
+          }
         }
       }),
   });
@@ -109,7 +121,13 @@ function devicePanel(onCleanup: (fn: () => void) => void): HTMLElement {
   // One progress line for the whole download, kept across re-renders of the panel.
   const progress = h('p', { class: 'small muted', 'aria-live': 'polite' });
   const showProgress = (p: number | null) => {
-    progress.textContent = p == null ? '' : `${Math.round(p * 100)}% downloaded`;
+    // Chrome's progress stops near 90% while it unpacks the model, which takes a few minutes.
+    progress.textContent =
+      p == null
+        ? ''
+        : p >= 0.9
+          ? `${Math.round(p * 100)}% downloaded. Chrome is unpacking the model, which can take a few minutes.`
+          : `${Math.round(p * 100)}% downloaded`;
   };
   showProgress(downloadProgress());
   onCleanup(onDownloadProgress(showProgress));

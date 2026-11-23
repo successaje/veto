@@ -28,6 +28,7 @@
       },
       { "source": "/", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
       { "source": "**/*.html", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+      { "source": "/eval", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
       { "source": "/app", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
       { "source": "/app/**", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
       { "source": "/r/**", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
